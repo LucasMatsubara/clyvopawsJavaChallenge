@@ -1,4 +1,4 @@
-package fiap.com.br.clyvovet;
+package br.com.fiap.clyvovet;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

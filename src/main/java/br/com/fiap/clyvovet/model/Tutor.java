@@ -1,4 +1,4 @@
-package fiap.com.br.clyvovet.model;
+package br.com.fiap.clyvovet.model;
 
 import jakarta.persistence.*;
 import lombok.Data;

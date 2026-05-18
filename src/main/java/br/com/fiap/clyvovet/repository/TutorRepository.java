@@ -1,6 +1,6 @@
-package fiap.com.br.clyvovet.repository;
+package br.com.fiap.clyvovet.repository;
 
-import fiap.com.br.clyvovet.model.Tutor;
+import br.com.fiap.clyvovet.model.Tutor;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface TutorRepository extends JpaRepository<Tutor, Long> {

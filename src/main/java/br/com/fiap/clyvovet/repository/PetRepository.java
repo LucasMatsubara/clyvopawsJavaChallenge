@@ -1,6 +1,6 @@
-package fiap.com.br.clyvovet.repository;
+package br.com.fiap.clyvovet.repository;
 
-import fiap.com.br.clyvovet.model.Pet;
+import br.com.fiap.clyvovet.model.Pet;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 

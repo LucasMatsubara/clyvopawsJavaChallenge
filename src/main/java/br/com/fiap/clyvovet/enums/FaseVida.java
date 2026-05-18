@@ -1,4 +1,4 @@
-package fiap.com.br.clyvovet.enums;
+package br.com.fiap.clyvovet.enums;
 
 public enum FaseVida {
     FILHOTE,
