@@ -1,4 +1,4 @@
-package br.com.fiap.clyvovet;
+package fiap.com.br.clyvovet;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
