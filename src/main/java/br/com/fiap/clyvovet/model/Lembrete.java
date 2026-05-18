@@ -1,5 +1,7 @@
 package br.com.fiap.clyvovet.model;
 
+import br.com.fiap.clyvovet.enums.StatusLembrete;
+import br.com.fiap.clyvovet.enums.TipoLembrete;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,6 +24,14 @@ public class Lembrete {
 
     @Column(nullable = false, length = 500)
     private String mensagemPersonalizada;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private StatusLembrete status;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private TipoLembrete tipoLembrete;
 
     @ManyToOne
     @JoinColumn(name = "plano_id", nullable = false)
