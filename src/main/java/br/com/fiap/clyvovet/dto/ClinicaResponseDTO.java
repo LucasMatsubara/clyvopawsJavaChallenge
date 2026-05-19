@@ -10,5 +10,5 @@ public class ClinicaResponseDTO {
     private String nomeUnidade;
     private String redeFranquia;
     private String cnpj;
-    private String city; // Ajustado conforme o campo mapeado na sua entidade
+    private String city;
 }
