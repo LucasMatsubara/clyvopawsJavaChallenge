@@ -30,11 +30,9 @@ public class Tutor {
 
     private String fotoUrl;
 
-    // Relacionamento 1 Tutor -> N Pets
     @OneToMany(mappedBy = "tutor", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Pet> pets;
 
-    // Mapeamento do Endereço (usando @Embedded para simplificar ou @OneToOne)
     @Embedded
     private Endereco endereco;
 }

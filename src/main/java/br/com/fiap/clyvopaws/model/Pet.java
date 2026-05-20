@@ -18,7 +18,7 @@ public class Pet {
     private String nome;
 
     @Column(nullable = false, length = 50)
-    private String especie; // "CACHORRO" ou "GATO"
+    private String especie;
 
     @Column(nullable = false, length = 50)
     private String raca;
@@ -29,7 +29,7 @@ public class Pet {
     private String sexo;
 
     @Column(nullable = false)
-    private LocalDate dataNascimento; // Para calcular a idade dinamicamente
+    private LocalDate dataNascimento;
 
     @Column(length = 500)
     private String descricao;
