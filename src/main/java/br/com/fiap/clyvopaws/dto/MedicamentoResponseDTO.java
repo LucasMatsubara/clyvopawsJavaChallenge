@@ -1,5 +1,7 @@
 package br.com.fiap.clyvopaws.dto;
 
+import br.com.fiap.clyvopaws.enums.StatusMedicamento;
+
 import java.time.LocalDate;
 
 public record MedicamentoResponseDTO(
@@ -9,5 +11,6 @@ public record MedicamentoResponseDTO(
         String frequencia,
         LocalDate dataInicio,
         Integer duracaoDias,
+        StatusMedicamento status,
         Long consultaId
 ) {}

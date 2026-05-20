@@ -1,5 +1,6 @@
 package br.com.fiap.clyvopaws.dto;
 
+import br.com.fiap.clyvopaws.enums.StatusMedicamento;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
@@ -18,6 +19,9 @@ public record MedicamentoRequestDTO(
         LocalDate dataInicio,
 
         Integer duracaoDias,
+
+        @NotNull(message = "O status do medicamento é obrigatório")
+        StatusMedicamento status,
 
         @NotNull(message = "O ID da consulta é obrigatório")
         Long consultaId

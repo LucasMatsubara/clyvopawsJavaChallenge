@@ -1,5 +1,6 @@
 package br.com.fiap.clyvopaws.model;
 
+import br.com.fiap.clyvopaws.enums.Especie;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -12,8 +13,9 @@ public class CatalogoPreventivo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50)
-    private String especie;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private Especie especie;
 
     @Column(nullable = false, length = 50)
     private String raca;

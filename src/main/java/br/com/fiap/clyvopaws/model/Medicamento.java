@@ -1,5 +1,6 @@
 package br.com.fiap.clyvopaws.model;
 
+import br.com.fiap.clyvopaws.enums.StatusMedicamento;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
@@ -27,6 +28,10 @@ public class Medicamento {
     private LocalDate dataInicio;
 
     private Integer duracaoDias;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private StatusMedicamento status;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "consulta_id", nullable = false)
