@@ -40,4 +40,4 @@ Todos os documentos probatorios estao na pasta raiz do projeto na pasta "/docume
 2. Execute o projeto via Maven: 'mvn spring-boot:run' ou pela sua IDE.
 3. Acesse a documentacao do Swagger: http://localhost:8080/swagger-ui.html
 
-================================================================================
+--------------------------------------------------------------------------------
