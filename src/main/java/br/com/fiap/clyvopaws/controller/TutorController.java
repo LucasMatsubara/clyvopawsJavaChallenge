@@ -15,23 +15,28 @@ import java.net.URI;
 @RequestMapping("/tutores")
 @RequiredArgsConstructor
 public class TutorController {
-
     private final TutorService tutorService;
 
     @PostMapping
     public ResponseEntity<TutorResponseDTO> cadastrar(@Valid @RequestBody TutorRequestDTO request) {
         TutorResponseDTO response = tutorService.cadastrar(request);
-
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(response.id())
-                .toUri();
-
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(response.id()).toUri();
         return ResponseEntity.created(uri).body(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TutorResponseDTO> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<TutorResponseDTO> buscarPorId(@PathVariable("id") Long id) {
         return ResponseEntity.ok(tutorService.buscarPorId(id));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TutorResponseDTO> atualizar(@PathVariable("id") Long id, @Valid @RequestBody TutorRequestDTO request) {
+        return ResponseEntity.ok(tutorService.atualizar(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable("id") Long id) {
+        tutorService.excluir(id);
+        return ResponseEntity.noContent().build();
     }
 }

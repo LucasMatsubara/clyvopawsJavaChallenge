@@ -16,7 +16,6 @@ import java.util.List;
 @RequestMapping("/consultas")
 @RequiredArgsConstructor
 public class ConsultaController {
-
     private final ConsultaService consultaService;
 
     @PostMapping
@@ -26,8 +25,24 @@ public class ConsultaController {
         return ResponseEntity.created(uri).body(response);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<ConsultaResponseDTO> buscarPorId(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(consultaService.buscarPorId(id));
+    }
+
     @GetMapping("/pet/{petId}")
-    public ResponseEntity<List<ConsultaResponseDTO>> listarHistorico(@PathVariable Long petId) {
+    public ResponseEntity<List<ConsultaResponseDTO>> listarHistorico(@PathVariable("petId") Long petId) {
         return ResponseEntity.ok(consultaService.listarHistoricoPorPet(petId));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ConsultaResponseDTO> atualizar(@PathVariable("id") Long id, @Valid @RequestBody ConsultaRequestDTO request) {
+        return ResponseEntity.ok(consultaService.atualizar(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable("id") Long id) {
+        consultaService.excluir(id);
+        return ResponseEntity.noContent().build();
     }
 }

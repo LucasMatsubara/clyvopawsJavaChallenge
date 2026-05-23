@@ -12,17 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class TutorService {
-
     private final TutorRepository tutorRepository;
 
     @Transactional
     public TutorResponseDTO cadastrar(TutorRequestDTO request) {
-        if (tutorRepository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException("E-mail já cadastrado no sistema.");
-        }
-        if (tutorRepository.existsByCpf(request.cpf())) {
-            throw new IllegalArgumentException("CPF já cadastrado no sistema.");
-        }
+        if (tutorRepository.existsByEmail(request.email())) throw new IllegalArgumentException("E-mail já cadastrado.");
+        if (tutorRepository.existsByCpf(request.cpf())) throw new IllegalArgumentException("CPF já cadastrado.");
 
         Tutor tutor = new Tutor();
         tutor.setNomeCompleto(request.nomeCompleto());
@@ -32,24 +27,30 @@ public class TutorService {
         tutor.setSenha(request.senha());
         tutor.setFotoUrl(request.fotoUrl());
 
-        tutor = tutorRepository.save(tutor);
-
-        return toResponseDTO(tutor);
+        return toResponseDTO(tutorRepository.save(tutor));
     }
 
     public TutorResponseDTO buscarPorId(Long id) {
-        Tutor tutor = tutorRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Tutor não encontrado com o ID: " + id));
+        Tutor tutor = tutorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tutor não encontrado."));
         return toResponseDTO(tutor);
     }
 
+    @Transactional
+    public TutorResponseDTO atualizar(Long id, TutorRequestDTO request) {
+        Tutor tutor = tutorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tutor não encontrado."));
+        tutor.setNomeCompleto(request.nomeCompleto());
+        tutor.setTelefone(request.telefone());
+        tutor.setFotoUrl(request.fotoUrl());
+        return toResponseDTO(tutorRepository.save(tutor));
+    }
+
+    @Transactional
+    public void excluir(Long id) {
+        if (!tutorRepository.existsById(id)) throw new EntityNotFoundException("Tutor não encontrado.");
+        tutorRepository.deleteById(id);
+    }
+
     private TutorResponseDTO toResponseDTO(Tutor tutor) {
-        return new TutorResponseDTO(
-                tutor.getId(),
-                tutor.getNomeCompleto(),
-                tutor.getEmail(),
-                tutor.getTelefone(),
-                tutor.getFotoUrl()
-        );
+        return new TutorResponseDTO(tutor.getId(), tutor.getNomeCompleto(), tutor.getEmail(), tutor.getTelefone(), tutor.getFotoUrl());
     }
 }

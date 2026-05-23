@@ -14,23 +14,19 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MedicamentoService {
-
     private final MedicamentoRepository medicamentoRepository;
     private final ConsultaRepository consultaRepository;
     private final HistoricoDoseRepository historicoDoseRepository;
 
     @Transactional
     public MedicamentoResponseDTO cadastrar(MedicamentoRequestDTO request) {
-        Consulta consulta = consultaRepository.findById(request.consultaId())
-                .orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada. ID: " + request.consultaId()));
-
+        Consulta consulta = consultaRepository.findById(request.consultaId()).orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
         Medicamento medicamento = new Medicamento();
         medicamento.setNome(request.nome());
         medicamento.setDosagem(request.dosagem());
@@ -39,40 +35,44 @@ public class MedicamentoService {
         medicamento.setDuracaoDias(request.duracaoDias());
         medicamento.setStatus(request.status());
         medicamento.setConsulta(consulta);
+        return toResponseDTO(medicamentoRepository.save(medicamento));
+    }
 
-        medicamento = medicamentoRepository.save(medicamento);
-        return toResponseDTO(medicamento);
+    public MedicamentoResponseDTO buscarPorId(Long id) {
+        Medicamento med = medicamentoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Medicamento não encontrado."));
+        return toResponseDTO(med);
     }
 
     public List<MedicamentoResponseDTO> listarPorConsulta(Long consultaId) {
-        return medicamentoRepository.findByConsultaId(consultaId).stream()
-                .map(this::toResponseDTO)
-                .collect(Collectors.toList());
+        return medicamentoRepository.findByConsultaId(consultaId).stream().map(this::toResponseDTO).collect(Collectors.toList());
     }
 
     @Transactional
     public HistoricoDoseResponseDTO registrarDose(HistoricoDoseRequestDTO request) {
-        Medicamento medicamento = medicamentoRepository.findById(request.medicamentoId())
-                .orElseThrow(() -> new EntityNotFoundException("Medicamento não encontrado."));
-
+        Medicamento medicamento = medicamentoRepository.findById(request.medicamentoId()).orElseThrow(() -> new EntityNotFoundException("Medicamento não encontrado."));
         HistoricoDose dose = new HistoricoDose();
         dose.setDataHoraToma(request.dataHoraToma());
         dose.setMedicamento(medicamento);
-
         dose = historicoDoseRepository.save(dose);
         return new HistoricoDoseResponseDTO(dose.getId(), dose.getDataHoraToma(), medicamento.getId());
     }
 
+    @Transactional
+    public MedicamentoResponseDTO atualizar(Long id, MedicamentoRequestDTO request) {
+        Medicamento med = medicamentoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Medicamento não encontrado."));
+        med.setDosagem(request.dosagem());
+        med.setFrequencia(request.frequencia());
+        med.setStatus(request.status());
+        return toResponseDTO(medicamentoRepository.save(med));
+    }
+
+    @Transactional
+    public void excluir(Long id) {
+        if (!medicamentoRepository.existsById(id)) throw new EntityNotFoundException("Medicamento não encontrado.");
+        medicamentoRepository.deleteById(id);
+    }
+
     private MedicamentoResponseDTO toResponseDTO(Medicamento medicamento) {
-        return new MedicamentoResponseDTO(
-                medicamento.getId(),
-                medicamento.getNome(),
-                medicamento.getDosagem(),
-                medicamento.getFrequencia(),
-                medicamento.getDataInicio(),
-                medicamento.getDuracaoDias(),
-                medicamento.getStatus(),
-                medicamento.getConsulta().getId()
-        );
+        return new MedicamentoResponseDTO(medicamento.getId(), medicamento.getNome(), medicamento.getDosagem(), medicamento.getFrequencia(), medicamento.getDataInicio(), medicamento.getDuracaoDias(), medicamento.getStatus(), medicamento.getConsulta().getId());
     }
 }

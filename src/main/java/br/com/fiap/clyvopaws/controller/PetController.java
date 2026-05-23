@@ -20,7 +20,6 @@ import java.util.List;
 @RequestMapping("/pets")
 @RequiredArgsConstructor
 public class PetController {
-
     private final PetService petService;
 
     @PostMapping
@@ -32,18 +31,28 @@ public class PetController {
 
     @GetMapping("/{id}")
     @Cacheable(value = "pets", key = "#id")
-    public ResponseEntity<PetResponseDTO> buscarPorId(@PathVariable Long id) {
+    public ResponseEntity<PetResponseDTO> buscarPorId(@PathVariable("id") Long id) {
         return ResponseEntity.ok(petService.buscarPorId(id));
     }
 
     @GetMapping("/tutor/{tutorId}")
-    public ResponseEntity<List<PetResponseDTO>> listarPorTutor(@PathVariable Long tutorId) {
+    public ResponseEntity<List<PetResponseDTO>> listarPorTutor(@PathVariable("tutorId") Long tutorId) {
         return ResponseEntity.ok(petService.listarPorTutor(tutorId));
     }
 
     @GetMapping
-    public ResponseEntity<Page<PetResponseDTO>> listarTodos(
-            @PageableDefault(size = 10, sort = "nome") Pageable pageable) {
+    public ResponseEntity<Page<PetResponseDTO>> listarTodos(@PageableDefault(size = 10, sort = "nome") Pageable pageable) {
         return ResponseEntity.ok(petService.listarTodosPaginado(pageable));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PetResponseDTO> atualizar(@PathVariable("id") Long id, @Valid @RequestBody PetRequestDTO request) {
+        return ResponseEntity.ok(petService.atualizar(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable("id") Long id) {
+        petService.excluir(id);
+        return ResponseEntity.noContent().build();
     }
 }

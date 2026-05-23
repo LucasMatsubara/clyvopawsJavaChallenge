@@ -16,23 +16,33 @@ import java.util.List;
 @RequestMapping("/agendamentos")
 @RequiredArgsConstructor
 public class AgendamentoController {
-
     private final AgendamentoService agendamentoService;
 
     @PostMapping
     public ResponseEntity<AgendamentoResponseDTO> cadastrar(@Valid @RequestBody AgendamentoRequestDTO request) {
         AgendamentoResponseDTO response = agendamentoService.cadastrar(request);
-
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(response.id())
-                .toUri();
-
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(response.id()).toUri();
         return ResponseEntity.created(uri).body(response);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<AgendamentoResponseDTO> buscarPorId(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(agendamentoService.buscarPorId(id));
+    }
+
     @GetMapping("/consulta/{consultaId}")
-    public ResponseEntity<List<AgendamentoResponseDTO>> listarPorConsulta(@PathVariable Long consultaId) {
+    public ResponseEntity<List<AgendamentoResponseDTO>> listarPorConsulta(@PathVariable("consultaId") Long consultaId) {
         return ResponseEntity.ok(agendamentoService.listarPorConsulta(consultaId));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<AgendamentoResponseDTO> atualizar(@PathVariable("id") Long id, @Valid @RequestBody AgendamentoRequestDTO request) {
+        return ResponseEntity.ok(agendamentoService.atualizar(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable("id") Long id) {
+        agendamentoService.excluir(id);
+        return ResponseEntity.noContent().build();
     }
 }

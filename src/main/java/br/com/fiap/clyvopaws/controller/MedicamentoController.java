@@ -18,18 +18,22 @@ import java.util.List;
 @RequestMapping("/medicamentos")
 @RequiredArgsConstructor
 public class MedicamentoController {
-
     private final MedicamentoService medicamentoService;
 
     @PostMapping
-    public ResponseEntity<          MedicamentoResponseDTO> cadastrar(@Valid @RequestBody MedicamentoRequestDTO request) {
+    public ResponseEntity<MedicamentoResponseDTO> cadastrar(@Valid @RequestBody MedicamentoRequestDTO request) {
         MedicamentoResponseDTO response = medicamentoService.cadastrar(request);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(response.id()).toUri();
         return ResponseEntity.created(uri).body(response);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<MedicamentoResponseDTO> buscarPorId(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(medicamentoService.buscarPorId(id));
+    }
+
     @GetMapping("/consulta/{consultaId}")
-    public ResponseEntity<List<MedicamentoResponseDTO>> listarPorConsulta(@PathVariable Long consultaId) {
+    public ResponseEntity<List<MedicamentoResponseDTO>> listarPorConsulta(@PathVariable("consultaId") Long consultaId) {
         return ResponseEntity.ok(medicamentoService.listarPorConsulta(consultaId));
     }
 
@@ -37,5 +41,16 @@ public class MedicamentoController {
     public ResponseEntity<HistoricoDoseResponseDTO> registrarDose(@Valid @RequestBody HistoricoDoseRequestDTO request) {
         HistoricoDoseResponseDTO response = medicamentoService.registrarDose(request);
         return ResponseEntity.status(201).body(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<MedicamentoResponseDTO> atualizar(@PathVariable("id") Long id, @Valid @RequestBody MedicamentoRequestDTO request) {
+        return ResponseEntity.ok(medicamentoService.atualizar(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> excluir(@PathVariable("id") Long id) {
+        medicamentoService.excluir(id);
+        return ResponseEntity.noContent().build();
     }
 }

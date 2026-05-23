@@ -6,51 +6,58 @@ import br.com.fiap.clyvopaws.model.Consulta;
 import br.com.fiap.clyvopaws.model.Pet;
 import br.com.fiap.clyvopaws.repository.ConsultaRepository;
 import br.com.fiap.clyvopaws.repository.PetRepository;
+
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class ConsultaService {
-
     private final ConsultaRepository consultaRepository;
     private final PetRepository petRepository;
 
     @Transactional
     public ConsultaResponseDTO cadastrar(ConsultaRequestDTO request) {
-        Pet pet = petRepository.findById(request.petId())
-                .orElseThrow(() -> new EntityNotFoundException("Pet não encontrado com ID: " + request.petId()));
-
+        Pet pet = petRepository.findById(request.petId()).orElseThrow(() -> new EntityNotFoundException("Pet não encontrado."));
         Consulta consulta = new Consulta();
         consulta.setDataConsulta(request.dataConsulta());
         consulta.setClinica(request.clinica());
         consulta.setNomeVeterinario(request.nomeVeterinario());
         consulta.setLaudo(request.laudo());
         consulta.setPet(pet);
+        return toResponseDTO(consultaRepository.save(consulta));
+    }
 
-        consulta = consultaRepository.save(consulta);
+    public ConsultaResponseDTO buscarPorId(Long id) {
+        Consulta consulta = consultaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
         return toResponseDTO(consulta);
     }
 
     public List<ConsultaResponseDTO> listarHistoricoPorPet(Long petId) {
-        return consultaRepository.findByPetIdOrderByDataConsultaDesc(petId).stream()
-                .map(this::toResponseDTO)
-                .collect(Collectors.toList());
+        return consultaRepository.findByPetIdOrderByDataConsultaDesc(petId).stream().map(this::toResponseDTO).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public ConsultaResponseDTO atualizar(Long id, ConsultaRequestDTO request) {
+        Consulta consulta = consultaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
+        consulta.setDataConsulta(request.dataConsulta());
+        consulta.setClinica(request.clinica());
+        consulta.setNomeVeterinario(request.nomeVeterinario());
+        consulta.setLaudo(request.laudo());
+        return toResponseDTO(consultaRepository.save(consulta));
+    }
+
+    @Transactional
+    public void excluir(Long id) {
+        if (!consultaRepository.existsById(id)) throw new EntityNotFoundException("Consulta não encontrada.");
+        consultaRepository.deleteById(id);
     }
 
     private ConsultaResponseDTO toResponseDTO(Consulta consulta) {
-        return new ConsultaResponseDTO(
-                consulta.getId(),
-                consulta.getDataConsulta(),
-                consulta.getClinica(),
-                consulta.getNomeVeterinario(),
-                consulta.getLaudo(),
-                consulta.getPet().getId()
-        );
+        return new ConsultaResponseDTO(consulta.getId(), consulta.getDataConsulta(), consulta.getClinica(), consulta.getNomeVeterinario(), consulta.getLaudo(), consulta.getPet().getId());
     }
 }
