@@ -7,6 +7,8 @@ import br.com.fiap.clyvopaws.repository.CatalogoPreventivoRepository;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 public class CatalogoPreventivoService {
     private final CatalogoPreventivoRepository catalogoPreventivoRepository;
 
+    @Cacheable("planosPreventivos")
     @Transactional(readOnly = true)
     public List<CatalogoPreventivoResponseDTO> buscarPlanoPreventivo(String especieRecebida) {
         try {
@@ -34,10 +37,12 @@ public class CatalogoPreventivoService {
 
     @Transactional(readOnly = true)
     public CatalogoPreventivoResponseDTO buscarPorId(Long id) {
-        CatalogoPreventivo cat = catalogoPreventivoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Diretriz não encontrada."));
+        CatalogoPreventivo cat = catalogoPreventivoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Diretriz não encontrada."));
         return toResponseDTO(cat);
     }
 
+    @CacheEvict(value = "planosPreventivos", allEntries = true)
     @Transactional
     public CatalogoPreventivoResponseDTO cadastrar(CatalogoPreventivoRequestDTO request) {
         CatalogoPreventivo cat = new CatalogoPreventivo();
@@ -50,9 +55,11 @@ public class CatalogoPreventivoService {
         return toResponseDTO(catalogoPreventivoRepository.save(cat));
     }
 
+    @CacheEvict(value = "planosPreventivos", allEntries = true)
     @Transactional
     public CatalogoPreventivoResponseDTO atualizar(Long id, CatalogoPreventivoRequestDTO request) {
-        CatalogoPreventivo cat = catalogoPreventivoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Diretriz não encontrada."));
+        CatalogoPreventivo cat = catalogoPreventivoRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Diretriz não encontrada."));
         cat.setDoencaPredisposta(request.doencaPredisposta());
         cat.setIdadeAlertaMeses(request.idadeAlertaMeses());
         cat.setDicaPrevencao(request.dicaPrevencao());
@@ -60,13 +67,24 @@ public class CatalogoPreventivoService {
         return toResponseDTO(catalogoPreventivoRepository.save(cat));
     }
 
+    @CacheEvict(value = "planosPreventivos", allEntries = true)
     @Transactional
     public void excluir(Long id) {
-        if (!catalogoPreventivoRepository.existsById(id)) throw new EntityNotFoundException("Diretriz não encontrada.");
+        if (!catalogoPreventivoRepository.existsById(id)) {
+            throw new EntityNotFoundException("Diretriz não encontrada.");
+        }
         catalogoPreventivoRepository.deleteById(id);
     }
 
     private CatalogoPreventivoResponseDTO toResponseDTO(CatalogoPreventivo catalogo) {
-        return new CatalogoPreventivoResponseDTO(catalogo.getId(), catalogo.getEspecie(), catalogo.getRaca(), catalogo.getDoencaPredisposta(), catalogo.getIdadeAlertaMeses(), catalogo.getDicaPrevencao(), catalogo.getCuidadosRecomendados());
+        return new CatalogoPreventivoResponseDTO(
+                catalogo.getId(),
+                catalogo.getEspecie(),
+                catalogo.getRaca(),
+                catalogo.getDoencaPredisposta(),
+                catalogo.getIdadeAlertaMeses(),
+                catalogo.getDicaPrevencao(),
+                catalogo.getCuidadosRecomendados()
+        );
     }
 }

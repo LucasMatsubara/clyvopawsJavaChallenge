@@ -6,6 +6,8 @@ import br.com.fiap.clyvopaws.repository.*;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ public class ConsultaService {
     private final PetRepository petRepository;
     private final PetService petService;
 
+    @CacheEvict(value = "historicoConsultas", allEntries = true)
     @Transactional
     public ConsultaResponseDTO cadastrar(ConsultaRequestDTO request) {
         Pet pet = petRepository.findById(request.petId()).orElseThrow(() -> new EntityNotFoundException("Pet não encontrado."));
@@ -36,11 +39,13 @@ public class ConsultaService {
         return toResponseDTO(consulta);
     }
 
+    @Cacheable(value = "historicoConsultas")
     @Transactional(readOnly = true)
     public Page<ConsultaResponseDTO> listarHistoricoPorPet(Long petId, Pageable pageable) {
         return consultaRepository.findByPetIdOrderByDataConsultaDesc(petId, pageable).map(this::toResponseDTO);
     }
 
+    @CacheEvict(value = "historicoConsultas", allEntries = true)
     @Transactional
     public ConsultaResponseDTO atualizar(Long id, ConsultaRequestDTO request) {
         Consulta consulta = consultaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
@@ -51,6 +56,7 @@ public class ConsultaService {
         return toResponseDTO(consultaRepository.save(consulta));
     }
 
+    @CacheEvict(value = "historicoConsultas", allEntries = true)
     @Transactional
     public void excluir(Long id) {
         if (!consultaRepository.existsById(id)) throw new EntityNotFoundException("Consulta não encontrada.");
