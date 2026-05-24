@@ -8,8 +8,8 @@ services:
     environment:
       # O "@db:1521" faz a API achar o Oracle dentro da rede do Docker
       - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@db:1521:XE
-      - SPRING_DATASOURCE_USERNAME=system
-      - SPRING_DATASOURCE_PASSWORD=senha_forte_aqui
+      - SPRING_DATASOURCE_USERNAME=RM565020
+      - SPRING_DATASOURCE_PASSWORD=190207
       - SPRING_JPA_HIBERNATE_DDL_AUTO=update
 
   db:
@@ -17,7 +17,7 @@ services:
     ports:
       - "1521:1521"
     environment:
-      - ORACLE_PASSWORD=senha_forte_aqui
+      - ORACLE_PASSWORD=190207
     volumes:
       - oracledata:/opt/oracle/oradata
 
