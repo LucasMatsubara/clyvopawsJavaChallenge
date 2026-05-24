@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    environment:
+      # O "@db:1521" faz a API achar o Oracle dentro da rede do Docker
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@db:1521:XE
+      - SPRING_DATASOURCE_USERNAME=system
+      - SPRING_DATASOURCE_PASSWORD=senha_forte_aqui
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  db:
+    image: gvenzl/oracle-xe
+    ports:
+      - "1521:1521"
+    environment:
+      - ORACLE_PASSWORD=senha_forte_aqui
+    volumes:
+      - oracledata:/opt/oracle/oradata
+
+volumes:
+  oracledata:
