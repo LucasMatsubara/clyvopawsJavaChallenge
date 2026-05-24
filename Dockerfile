@@ -11,3 +11,12 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
+
+
+
+RUN addgroup -S clyvogroup && adduser -S clyvouser -G clyvogroup
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+RUN chown clyvouser:clyvogroup app.jar
+USER clyvouser
+ENTRYPOINT ["java", "-jar", "app.jar"]
