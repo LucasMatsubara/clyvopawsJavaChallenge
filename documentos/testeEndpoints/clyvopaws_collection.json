@@ -1,0 +1,135 @@
+{
+	"info": {
+		"_postman_id": "c1a2b3c4-d5e6-7f8a-9b0c-1d2e3f4a5b6c",
+		"name": "Clyvo Paws API - FIAP Challenge",
+		"description": "Collection completa para avaliação da disciplina de Java Advanced. Contém testes de persistência (POST) e recuperação (GET) com paginação.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Tutores",
+			"item": [
+				{
+					"name": "1. Cadastrar Tutor (Testar Persistência)",
+					"request": {
+						"method": "POST",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nomeCompleto\": \"Carlos Almeida\",\n  \"cpf\": \"12345678901\",\n  \"telefone\": \"11988887777\",\n  \"email\": \"carlos.almeida@email.com\",\n  \"senha\": \"senhaForte123\",\n  \"endereco\": {\n    \"rua\": \"Av. Paulista\",\n    \"numero\": \"1000\",\n    \"cep\": \"01310-100\",\n    \"cidade\": \"São Paulo\",\n    \"estado\": \"SP\"\n  }\n}"
+						},
+						"url": { "raw": "http://localhost:8080/tutores", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "tutores" ] }
+					}
+				},
+				{
+					"name": "2. Listar Todos (Testar Recuperação/Paginação)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/tutores?page=0&size=10&sort=nomeCompleto", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "tutores" ], "query": [ { "key": "page", "value": "0" }, { "key": "size", "value": "10" }, { "key": "sort", "value": "nomeCompleto" } ] }
+					}
+				},
+				{
+					"name": "3. Buscar por ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/tutores/1", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "tutores", "1" ] }
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Catálogo Preventivo",
+			"item": [
+				{
+					"name": "1. Cadastrar Diretriz (Testar Persistência)",
+					"request": {
+						"method": "POST",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"especie\": \"CACHORRO\",\n  \"raca\": \"Golden Retriever\",\n  \"doencaPredisposta\": \"Displasia Coxofemoral\",\n  \"idadeAlertaMeses\": 24,\n  \"dicaPrevencao\": \"Evitar pisos lisos e manter controle rigoroso de peso.\",\n  \"cuidadosRecomendados\": \"Raio-X preventivo anual a partir dos 2 anos de idade.\"\n}"
+						},
+						"url": { "raw": "http://localhost:8080/planos-preventivos", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "planos-preventivos" ] }
+					}
+				},
+				{
+					"name": "2. Listar Todos (Testar Recuperação)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/planos-preventivos", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "planos-preventivos" ] }
+					}
+				},
+				{
+					"name": "3. Buscar por Espécie (Com Cache)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/planos-preventivos/busca?especie=CACHORRO", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "planos-preventivos", "busca" ], "query": [ { "key": "especie", "value": "CACHORRO" } ] }
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Consultas e Histórico",
+			"item": [
+				{
+					"name": "1. Listar Todas as Consultas",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/consultas", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "consultas" ] }
+					}
+				},
+				{
+					"name": "2. Listar Histórico do Pet (Paginado)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/consultas/pet/1", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "consultas", "pet", "1" ] }
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Medicamentos e Doses",
+			"item": [
+				{
+					"name": "1. Listar Medicamentos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/medicamentos", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "medicamentos" ] }
+					}
+				},
+				{
+					"name": "2. Registrar Dose Tomada (Check-in)",
+					"request": {
+						"method": "POST",
+						"header": [ { "key": "Content-Type", "value": "application/json" } ],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"medicamentoId\": 1,\n  \"dataHoraToma\": \"2026-05-24T14:30:00\"\n}"
+						},
+						"url": { "raw": "http://localhost:8080/medicamentos/doses/check", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "medicamentos", "doses", "check" ] }
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Agendamentos",
+			"item": [
+				{
+					"name": "1. Listar Todos os Agendamentos",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": { "raw": "http://localhost:8080/agendamentos", "protocol": "http", "host": [ "localhost" ], "port": "8080", "path": [ "agendamentos" ] }
+					}
+				}
+			]
+		}
+	]
+}
