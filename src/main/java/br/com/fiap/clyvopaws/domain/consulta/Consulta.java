@@ -1,8 +1,10 @@
 package br.com.fiap.clyvopaws.domain.consulta;
 
 import br.com.fiap.clyvopaws.domain.agendamento.Agendamento;
+import br.com.fiap.clyvopaws.domain.clinica.Clinica;
 import br.com.fiap.clyvopaws.domain.medicamento.Medicamento;
 import br.com.fiap.clyvopaws.domain.pet.Pet;
+import br.com.fiap.clyvopaws.domain.veterinario.Veterinario;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDateTime;
@@ -17,25 +19,28 @@ public class Consulta {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private LocalDateTime dataConsulta;
+    @Column(name = "data_hora", nullable = false)
+    private LocalDateTime dataHora;
 
-    @Column(nullable = false, length = 100)
-    private String clinica;
+    @Column(length = 255)
+    private String resumo;
 
-    @Column(length = 100)
-    private String nomeVeterinario;
-
-    @Column(length = 4000)
-    private String laudo;
+    @Column(length = 255)
+    private String diagnostico;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pet_id", nullable = false)
     private Pet pet;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "veterinario_id", nullable = false)
+    private Veterinario veterinario;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "clinica_id", nullable = false)
+    private Clinica clinica;
+
     @OneToMany(mappedBy = "consulta", cascade = CascadeType.ALL)
     private List<Medicamento> medicamentos;
 
-//    @OneToMany(mappedBy = "consulta", cascade = CascadeType.ALL)
-//    private List<Agendamento> agendamentos;
 }

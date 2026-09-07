@@ -1,14 +1,10 @@
 package br.com.fiap.clyvopaws.domain.consulta;
 
-import br.com.fiap.clyvopaws.domain.pet.Pet;
+import br.com.fiap.clyvopaws.domain.clinica.ClinicaRepository;
 import br.com.fiap.clyvopaws.domain.pet.PetRepository;
-import br.com.fiap.clyvopaws.domain.pet.PetResponseDTO;
-
-import br.com.fiap.clyvopaws.domain.pet.PetService;
+import br.com.fiap.clyvopaws.domain.veterinario.VeterinarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -17,60 +13,76 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @RequiredArgsConstructor
 public class ConsultaService {
+
     private final ConsultaRepository consultaRepository;
     private final PetRepository petRepository;
-    private final PetService petService;
+    private final VeterinarioRepository veterinarioRepository;
+    private final ClinicaRepository clinicaRepository;
 
-    @CacheEvict(value = "historicoConsultas", allEntries = true)
     @Transactional
-    public ConsultaResponseDTO cadastrar(ConsultaRequestDTO request) {
-        Pet pet = petRepository.findById(request.petId()).orElseThrow(() -> new EntityNotFoundException("Pet não encontrado."));
-        Consulta consulta = new Consulta();
-        consulta.setDataConsulta(request.dataConsulta());
-        consulta.setClinica(request.clinica());
-        consulta.setNomeVeterinario(request.nomeVeterinario());
-        consulta.setLaudo(request.laudo());
+    public ConsultaResponseDTO cadastrar(ConsultaRequestDTO dto) {
+        var pet = petRepository.findById(dto.petId())
+                .orElseThrow(() -> new EntityNotFoundException("Pet não encontrado."));
+        var veterinario = veterinarioRepository.findById(dto.veterinarioId())
+                .orElseThrow(() -> new EntityNotFoundException("Veterinário não encontrado."));
+        var clinica = clinicaRepository.findById(dto.clinicaId())
+                .orElseThrow(() -> new EntityNotFoundException("Clínica não encontrada."));
+
+        var consulta = new Consulta();
         consulta.setPet(pet);
-        return toResponseDTO(consultaRepository.save(consulta));
+        consulta.setVeterinario(veterinario);
+        consulta.setClinica(clinica);
+        consulta.setDataHora(dto.dataHora());
+        consulta.setResumo(dto.resumo());
+        consulta.setDiagnostico(dto.diagnostico());
+
+        return new ConsultaResponseDTO(consultaRepository.save(consulta));
     }
 
     @Transactional(readOnly = true)
     public ConsultaResponseDTO buscarPorId(Long id) {
-        Consulta consulta = consultaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
-        return toResponseDTO(consulta);
+        var consulta = consultaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
+        return new ConsultaResponseDTO(consulta);
     }
 
     @Transactional(readOnly = true)
     public Page<ConsultaResponseDTO> listarTodas(Pageable pageable) {
-        return consultaRepository.findAll(pageable).map(this::toResponseDTO);
+        return consultaRepository.findAll(pageable).map(ConsultaResponseDTO::new);
     }
 
-    @Cacheable(value = "historicoConsultas")
     @Transactional(readOnly = true)
     public Page<ConsultaResponseDTO> listarHistoricoPorPet(Long petId, Pageable pageable) {
-        return consultaRepository.findByPetIdOrderByDataConsultaDesc(petId, pageable).map(this::toResponseDTO);
+        return consultaRepository.findByPetId(petId, pageable).map(ConsultaResponseDTO::new);
     }
 
-    @CacheEvict(value = "historicoConsultas", allEntries = true)
     @Transactional
-    public ConsultaResponseDTO atualizar(Long id, ConsultaRequestDTO request) {
-        Consulta consulta = consultaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
-        consulta.setDataConsulta(request.dataConsulta());
-        consulta.setClinica(request.clinica());
-        consulta.setNomeVeterinario(request.nomeVeterinario());
-        consulta.setLaudo(request.laudo());
-        return toResponseDTO(consultaRepository.save(consulta));
+    public ConsultaResponseDTO atualizar(Long id, ConsultaRequestDTO dto) {
+        var consulta = consultaRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
+
+        var pet = petRepository.findById(dto.petId())
+                .orElseThrow(() -> new EntityNotFoundException("Pet não encontrado."));
+        var veterinario = veterinarioRepository.findById(dto.veterinarioId())
+                .orElseThrow(() -> new EntityNotFoundException("Veterinário não encontrado."));
+        var clinica = clinicaRepository.findById(dto.clinicaId())
+                .orElseThrow(() -> new EntityNotFoundException("Clínica não encontrada."));
+
+        consulta.setPet(pet);
+        consulta.setVeterinario(veterinario);
+        consulta.setClinica(clinica);
+        consulta.setDataHora(dto.dataHora());
+        consulta.setResumo(dto.resumo());
+        consulta.setDiagnostico(dto.diagnostico());
+
+        return new ConsultaResponseDTO(consultaRepository.save(consulta));
     }
 
-    @CacheEvict(value = "historicoConsultas", allEntries = true)
     @Transactional
     public void excluir(Long id) {
-        if (!consultaRepository.existsById(id)) throw new EntityNotFoundException("Consulta não encontrada.");
+        if (!consultaRepository.existsById(id)) {
+            throw new EntityNotFoundException("Consulta não encontrada.");
+        }
         consultaRepository.deleteById(id);
-    }
-
-    public ConsultaResponseDTO toResponseDTO(Consulta consulta) {
-        PetResponseDTO petDTO = petService.toResponseDTO(consulta.getPet());
-        return new ConsultaResponseDTO(consulta.getId(), consulta.getDataConsulta(), consulta.getClinica(), consulta.getNomeVeterinario(), consulta.getLaudo(), petDTO);
     }
 }

@@ -7,5 +7,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
-    Page<Consulta> findByPetIdOrderByDataConsultaDesc(Long petId, Pageable pageable);
+    Page<Consulta> findByPetId(Long petId, Pageable pageable);
 }
