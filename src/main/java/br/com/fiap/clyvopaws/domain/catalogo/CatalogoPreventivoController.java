@@ -30,7 +30,7 @@ public class CatalogoPreventivoController {
 
     @GetMapping("/busca")
     public ResponseEntity<List<CatalogoPreventivoResponseDTO>> buscarPlanoPreventivo(
-            @Parameter(description = "Digite a espécie (ex: CACHORRO, GATO)")
+            @Parameter(description = "Digite sdsdae espécie (ex: CACHORRO, GATO)")
             @RequestParam("especie") String especie) {
         return ResponseEntity.ok(catalogoPreventivoService.buscarPlanoPreventivo(especie));
     }
