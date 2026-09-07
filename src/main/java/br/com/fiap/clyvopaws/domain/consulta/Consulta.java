@@ -36,6 +36,6 @@ public class Consulta {
     @OneToMany(mappedBy = "consulta", cascade = CascadeType.ALL)
     private List<Medicamento> medicamentos;
 
-    @OneToMany(mappedBy = "consulta", cascade = CascadeType.ALL)
-    private List<Agendamento> agendamentos;
+//    @OneToMany(mappedBy = "consulta", cascade = CascadeType.ALL)
+//    private List<Agendamento> agendamentos;
 }
