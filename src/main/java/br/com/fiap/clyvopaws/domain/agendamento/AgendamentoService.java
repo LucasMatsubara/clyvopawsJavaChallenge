@@ -3,7 +3,6 @@ package br.com.fiap.clyvopaws.domain.agendamento;
 import br.com.fiap.clyvopaws.domain.consulta.Consulta;
 import br.com.fiap.clyvopaws.domain.consulta.ConsultaRepository;
 import br.com.fiap.clyvopaws.domain.consulta.ConsultaResponseDTO;
-
 import br.com.fiap.clyvopaws.domain.consulta.ConsultaService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -21,10 +20,26 @@ public class AgendamentoService {
     private final AgendamentoRepository agendamentoRepository;
     private final ConsultaRepository consultaRepository;
     private final ConsultaService consultaService;
+    private final AgendaDisponivelRepository agendaDisponivelRepository;
 
     @Transactional
     public AgendamentoResponseDTO cadastrar(AgendamentoRequestDTO request) {
-        Consulta consulta = consultaRepository.findById(request.consultaId()).orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
+        Consulta consulta = consultaRepository.findById(request.consultaId())
+                .orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
+
+        var veterinario = consulta.getVeterinario();
+        if (veterinario != null) {
+            var agendaDisponivel = agendaDisponivelRepository
+                    .findByVeterinarioIdAndDisponivelTrue(veterinario.getId())
+                    .stream()
+                    .filter(a -> !request.dataHora().isBefore(a.getDataHoraInicio()) && !request.dataHora().isAfter(a.getDataHoraFim()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException("O veterinário não possui horário disponível para esta data/hora."));
+
+            agendaDisponivel.setDisponivel(false);
+            agendaDisponivelRepository.save(agendaDisponivel);
+        }
+
         Agendamento agendamento = new Agendamento();
         agendamento.setDataHora(request.dataHora());
         agendamento.setTitulo(request.titulo());
@@ -65,7 +80,16 @@ public class AgendamentoService {
     }
 
     private AgendamentoResponseDTO toResponseDTO(Agendamento agendamento) {
-        ConsultaResponseDTO consultaDTO = consultaService.toResponseDTO(agendamento.getConsulta());
-        return new AgendamentoResponseDTO(agendamento.getId(), agendamento.getDataHora(), agendamento.getTitulo(), agendamento.getDescricao(), consultaDTO);
+        ConsultaResponseDTO consultaDTO = agendamento.getConsulta() != null
+                ? new ConsultaResponseDTO(agendamento.getConsulta())
+                : null;
+
+        return new AgendamentoResponseDTO(
+                agendamento.getId(),
+                agendamento.getDataHora(),
+                agendamento.getTitulo(),
+                agendamento.getDescricao(),
+                consultaDTO
+        );
     }
 }

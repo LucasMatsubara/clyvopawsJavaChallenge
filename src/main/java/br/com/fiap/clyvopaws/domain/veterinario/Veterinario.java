@@ -1,9 +1,11 @@
 package br.com.fiap.clyvopaws.domain.veterinario;
 
+import br.com.fiap.clyvopaws.domain.agendamento.AgendaDisponivel;
 import br.com.fiap.clyvopaws.domain.clinica.Clinica;
 import br.com.fiap.clyvopaws.domain.user.User;
 import jakarta.persistence.*;
 import lombok.Data;
+import java.util.List;
 
 @Data
 @Entity
@@ -35,4 +37,7 @@ public class Veterinario {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "clinica_id")
     private Clinica clinica;
+
+    @OneToMany(mappedBy = "veterinario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AgendaDisponivel> agendas;
 }
