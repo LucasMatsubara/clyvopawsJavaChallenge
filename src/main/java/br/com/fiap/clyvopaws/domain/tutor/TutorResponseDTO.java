@@ -7,9 +7,12 @@ import java.util.List;
 public record TutorResponseDTO(
         Long id,
         String nomeCompleto,
+        String cpf,
         String email,
         String telefone,
-        String fotoUrl,
-        EnderecoDTO endereco,
-        List<PetResumoDTO> pets
-) {}
+        String fotoUrl
+) {
+    public TutorResponseDTO(Tutor tutor) {
+        this(tutor.getId(), tutor.getNomeCompleto(), tutor.getCpf(), tutor.getEmail(), tutor.getTelefone(), tutor.getFotoUrl());
+    }
+}

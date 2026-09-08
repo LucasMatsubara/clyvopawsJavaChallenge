@@ -76,7 +76,19 @@ public class MedicamentoService {
     }
 
     private MedicamentoResponseDTO toResponseDTO(Medicamento medicamento) {
-        ConsultaResponseDTO consultaDTO = consultaService.toResponseDTO(medicamento.getConsulta());
-        return new MedicamentoResponseDTO(medicamento.getId(), medicamento.getNome(), medicamento.getDosagem(), medicamento.getFrequencia(), medicamento.getDataInicio(), medicamento.getDuracaoDias(), medicamento.getStatus(), consultaDTO);
+        ConsultaResponseDTO consultaDTO = medicamento.getConsulta() != null
+                ? new ConsultaResponseDTO(medicamento.getConsulta())
+                : null;
+
+        return new MedicamentoResponseDTO(
+                medicamento.getId(),
+                medicamento.getNome(),
+                medicamento.getDosagem(),
+                medicamento.getFrequencia(),
+                medicamento.getDataInicio(),
+                medicamento.getDuracaoDias(),
+                medicamento.getStatus(),
+                consultaDTO
+        );
     }
 }

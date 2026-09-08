@@ -1,33 +1,42 @@
 package br.com.fiap.clyvopaws.domain.tutor;
 
-import br.com.fiap.clyvopaws.domain.pet.PetResumoDTO;
-
+import br.com.fiap.clyvopaws.domain.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class TutorService {
+
     private final TutorRepository tutorRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Transactional
     public TutorResponseDTO cadastrar(TutorRequestDTO request) {
-        if (tutorRepository.existsByEmail(request.email())) throw new IllegalArgumentException("E-mail já cadastrado.");
-        if (tutorRepository.existsByCpf(request.cpf())) throw new IllegalArgumentException("CPF já cadastrado.");
+        if (tutorRepository.existsByEmail(request.email())) {
+            throw new IllegalArgumentException("E-mail já cadastrado.");
+        }
+        if (tutorRepository.existsByCpf(request.cpf())) {
+            throw new IllegalArgumentException("CPF já cadastrado.");
+        }
+
+        var user = new User();
+        user.setUsername(request.email());
+        user.setPassword(passwordEncoder.encode(request.senha()));
+        user.setRole("TUTOR");
 
         Tutor tutor = new Tutor();
         tutor.setNomeCompleto(request.nomeCompleto());
         tutor.setCpf(request.cpf());
         tutor.setTelefone(request.telefone());
         tutor.setEmail(request.email());
-        tutor.setSenha(request.senha());
         tutor.setFotoUrl(request.fotoUrl());
+        tutor.setUser(user);
 
         if (request.endereco() != null) {
             Endereco endereco = new Endereco();
@@ -45,7 +54,8 @@ public class TutorService {
 
     @Transactional(readOnly = true)
     public TutorResponseDTO buscarPorId(Long id) {
-        Tutor tutor = tutorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tutor não encontrado."));
+        Tutor tutor = tutorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Tutor não encontrado."));
         return toResponseDTO(tutor);
     }
 
@@ -56,13 +66,19 @@ public class TutorService {
 
     @Transactional
     public TutorResponseDTO atualizar(Long id, TutorRequestDTO request) {
-        Tutor tutor = tutorRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Tutor não encontrado."));
+        Tutor tutor = tutorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Tutor não encontrado."));
+
         tutor.setNomeCompleto(request.nomeCompleto());
+        tutor.setCpf(request.cpf());
         tutor.setTelefone(request.telefone());
+        tutor.setEmail(request.email());
         tutor.setFotoUrl(request.fotoUrl());
 
         if (request.endereco() != null) {
-            if (tutor.getEndereco() == null) tutor.setEndereco(new Endereco());
+            if (tutor.getEndereco() == null) {
+                tutor.setEndereco(new Endereco());
+            }
             tutor.getEndereco().setRua(request.endereco().rua());
             tutor.getEndereco().setNumero(request.endereco().numero());
             tutor.getEndereco().setComplemento(request.endereco().complemento());
@@ -76,28 +92,20 @@ public class TutorService {
 
     @Transactional
     public void excluir(Long id) {
-        if (!tutorRepository.existsById(id)) throw new EntityNotFoundException("Tutor não encontrado.");
+        if (!tutorRepository.existsById(id)) {
+            throw new EntityNotFoundException("Tutor não encontrado.");
+        }
         tutorRepository.deleteById(id);
     }
 
     private TutorResponseDTO toResponseDTO(Tutor tutor) {
-        EnderecoDTO enderecoDTO = null;
-        if (tutor.getEndereco() != null) {
-            enderecoDTO = new EnderecoDTO(
-                    tutor.getEndereco().getRua(), tutor.getEndereco().getNumero(),
-                    tutor.getEndereco().getComplemento(), tutor.getEndereco().getCep(),
-                    tutor.getEndereco().getCidade(), tutor.getEndereco().getEstado()
-            );
-        }
-
-        List<PetResumoDTO> petDTOs = List.of();
-        if (tutor.getPets() != null && !tutor.getPets().isEmpty()) {
-            petDTOs = tutor.getPets().stream().map(pet ->
-                    new PetResumoDTO(pet.getId(), pet.getNome())
-            ).toList();
-        }
-
-        return new TutorResponseDTO(tutor.getId(), tutor.getNomeCompleto(), tutor.getEmail(),
-                tutor.getTelefone(), tutor.getFotoUrl(), enderecoDTO, petDTOs);
+        return new TutorResponseDTO(
+                tutor.getId(),
+                tutor.getNomeCompleto(),
+                tutor.getCpf(),
+                tutor.getTelefone(),
+                tutor.getEmail(),
+                tutor.getFotoUrl()
+        );
     }
 }
