@@ -13,7 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping("/clinicas")
 @RequiredArgsConstructor
-@Tag(name = "Pets", description = "Endpoints para gerenciamento dos pets")
+@Tag(name = "Clínicas", description = "Endpoints para gerenciamento das clínicas")
 public class ClinicaController {
 
     private final ClinicaService service;
