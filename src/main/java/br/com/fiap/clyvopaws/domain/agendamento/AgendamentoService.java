@@ -1,5 +1,6 @@
 package br.com.fiap.clyvopaws.domain.agendamento;
 
+import br.com.fiap.clyvopaws.auth.AuthorizationService;
 import br.com.fiap.clyvopaws.domain.consulta.Consulta;
 import br.com.fiap.clyvopaws.domain.consulta.ConsultaRepository;
 import br.com.fiap.clyvopaws.domain.consulta.ConsultaResponseDTO;
@@ -21,11 +22,23 @@ public class AgendamentoService {
     private final ConsultaRepository consultaRepository;
     private final ConsultaService consultaService;
     private final AgendaDisponivelRepository agendaDisponivelRepository;
+    private final AuthorizationService authorizationService;
+
+    private void assertPodeVer(Agendamento agendamento) {
+        Consulta consulta = agendamento.getConsulta();
+        if (authorizationService.isAdmin()) return;
+        if (authorizationService.hasRole("VETERINARIO")) {
+            authorizationService.assertSelfVeterinario(consulta.getVeterinario().getId());
+            return;
+        }
+        authorizationService.assertSelfTutor(consulta.getPet().getTutor().getId());
+    }
 
     @Transactional
     public AgendamentoResponseDTO cadastrar(AgendamentoRequestDTO request) {
         Consulta consulta = consultaRepository.findById(request.consultaId())
                 .orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
+        authorizationService.assertSelfTutor(consulta.getPet().getTutor().getId());
 
         var veterinario = consulta.getVeterinario();
         if (veterinario != null) {
@@ -51,22 +64,37 @@ public class AgendamentoService {
     @Transactional(readOnly = true)
     public AgendamentoResponseDTO buscarPorId(Long id) {
         Agendamento ag = agendamentoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Agendamento não encontrado."));
+        assertPodeVer(ag);
         return toResponseDTO(ag);
     }
 
     @Transactional(readOnly = true)
     public Page<AgendamentoResponseDTO> listarTodos(Pageable pageable) {
+        if (!authorizationService.isAdmin()) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Apenas administradores podem listar todos os agendamentos.");
+        }
         return agendamentoRepository.findAll(pageable).map(this::toResponseDTO);
     }
 
     @Transactional(readOnly = true)
     public List<AgendamentoResponseDTO> listarPorConsulta(Long consultaId) {
+        Consulta consulta = consultaRepository.findById(consultaId)
+                .orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
+        if (!authorizationService.isAdmin()) {
+            if (authorizationService.hasRole("VETERINARIO")) {
+                authorizationService.assertSelfVeterinario(consulta.getVeterinario().getId());
+            } else {
+                authorizationService.assertSelfTutor(consulta.getPet().getTutor().getId());
+            }
+        }
         return agendamentoRepository.findByConsultaId(consultaId).stream().map(this::toResponseDTO).collect(Collectors.toList());
     }
 
     @Transactional
     public AgendamentoResponseDTO atualizar(Long id, AgendamentoRequestDTO request) {
         Agendamento ag = agendamentoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Agendamento não encontrado."));
+        authorizationService.assertSelfTutor(ag.getConsulta().getPet().getTutor().getId());
         ag.setDataHora(request.dataHora());
         ag.setTitulo(request.titulo());
         ag.setDescricao(request.descricao());
@@ -75,7 +103,8 @@ public class AgendamentoService {
 
     @Transactional
     public void excluir(Long id) {
-        if (!agendamentoRepository.existsById(id)) throw new EntityNotFoundException("Agendamento não encontrado.");
+        Agendamento ag = agendamentoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Agendamento não encontrado."));
+        authorizationService.assertSelfTutor(ag.getConsulta().getPet().getTutor().getId());
         agendamentoRepository.deleteById(id);
     }
 

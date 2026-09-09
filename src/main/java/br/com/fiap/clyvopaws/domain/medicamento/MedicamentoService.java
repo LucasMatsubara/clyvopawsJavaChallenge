@@ -1,5 +1,6 @@
 package br.com.fiap.clyvopaws.domain.medicamento;
 
+import br.com.fiap.clyvopaws.auth.AuthorizationService;
 import br.com.fiap.clyvopaws.domain.consulta.Consulta;
 import br.com.fiap.clyvopaws.domain.consulta.ConsultaRepository;
 import br.com.fiap.clyvopaws.domain.consulta.ConsultaResponseDTO;
@@ -9,6 +10,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,10 +21,22 @@ public class MedicamentoService {
     private final ConsultaRepository consultaRepository;
     private final HistoricoDoseRepository historicoDoseRepository;
     private final ConsultaService consultaService;
+    private final AuthorizationService authorizationService;
+
+    private void assertPodeVer(Medicamento medicamento) {
+        Consulta consulta = medicamento.getConsulta();
+        if (authorizationService.isAdmin()) return;
+        if (authorizationService.hasRole("VETERINARIO")) {
+            authorizationService.assertSelfVeterinario(consulta.getVeterinario().getId());
+            return;
+        }
+        authorizationService.assertSelfTutor(consulta.getPet().getTutor().getId());
+    }
 
     @Transactional
     public MedicamentoResponseDTO cadastrar(MedicamentoRequestDTO request) {
         Consulta consulta = consultaRepository.findById(request.consultaId()).orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
+        authorizationService.assertSelfVeterinario(consulta.getVeterinario().getId());
         Medicamento medicamento = new Medicamento();
         medicamento.setNome(request.nome());
         medicamento.setDosagem(request.dosagem());
@@ -37,22 +51,39 @@ public class MedicamentoService {
     @Transactional(readOnly = true)
     public MedicamentoResponseDTO buscarPorId(Long id) {
         Medicamento med = medicamentoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Medicamento não encontrado."));
+        assertPodeVer(med);
         return toResponseDTO(med);
     }
 
     @Transactional(readOnly = true)
     public Page<MedicamentoResponseDTO> listarTodos(Pageable pageable) {
-        return medicamentoRepository.findAll(pageable).map(this::toResponseDTO);
+        if (authorizationService.isAdmin()) {
+            return medicamentoRepository.findAll(pageable).map(this::toResponseDTO);
+        }
+        var vet = authorizationService.currentVeterinarioOrNull();
+        if (vet == null) {
+            throw new AccessDeniedException("Apenas veterinários (dos próprios pacientes) ou administradores podem listar todos os medicamentos.");
+        }
+        return medicamentoRepository.findByConsultaVeterinarioId(vet.getId(), pageable).map(this::toResponseDTO);
     }
 
     @Transactional(readOnly = true)
     public Page<MedicamentoResponseDTO> listarPorConsulta(Long consultaId, Pageable pageable) {
+        Consulta consulta = consultaRepository.findById(consultaId).orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
+        if (!authorizationService.isAdmin()) {
+            if (authorizationService.hasRole("VETERINARIO")) {
+                authorizationService.assertSelfVeterinario(consulta.getVeterinario().getId());
+            } else {
+                authorizationService.assertSelfTutor(consulta.getPet().getTutor().getId());
+            }
+        }
         return medicamentoRepository.findByConsultaId(consultaId, pageable).map(this::toResponseDTO);
     }
 
     @Transactional
     public HistoricoDoseResponseDTO registrarDose(HistoricoDoseRequestDTO request) {
         Medicamento medicamento = medicamentoRepository.findById(request.medicamentoId()).orElseThrow(() -> new EntityNotFoundException("Medicamento não encontrado."));
+        assertPodeVer(medicamento);
         HistoricoDose dose = new HistoricoDose();
         dose.setDataHoraToma(request.dataHoraToma());
         dose.setMedicamento(medicamento);
@@ -63,6 +94,7 @@ public class MedicamentoService {
     @Transactional
     public MedicamentoResponseDTO atualizar(Long id, MedicamentoRequestDTO request) {
         Medicamento med = medicamentoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Medicamento não encontrado."));
+        authorizationService.assertSelfVeterinario(med.getConsulta().getVeterinario().getId());
         med.setDosagem(request.dosagem());
         med.setFrequencia(request.frequencia());
         med.setStatus(request.status());
@@ -71,7 +103,8 @@ public class MedicamentoService {
 
     @Transactional
     public void excluir(Long id) {
-        if (!medicamentoRepository.existsById(id)) throw new EntityNotFoundException("Medicamento não encontrado.");
+        Medicamento med = medicamentoRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Medicamento não encontrado."));
+        authorizationService.assertSelfVeterinario(med.getConsulta().getVeterinario().getId());
         medicamentoRepository.deleteById(id);
     }
 

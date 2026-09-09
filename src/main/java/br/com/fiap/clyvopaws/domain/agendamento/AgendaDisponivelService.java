@@ -1,5 +1,6 @@
 package br.com.fiap.clyvopaws.domain.agendamento;
 
+import br.com.fiap.clyvopaws.auth.AuthorizationService;
 import br.com.fiap.clyvopaws.domain.veterinario.VeterinarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -13,9 +14,11 @@ public class AgendaDisponivelService {
 
     private final AgendaDisponivelRepository repository;
     private final VeterinarioRepository veterinarioRepository;
+    private final AuthorizationService authorizationService;
 
     @Transactional
     public AgendaDisponivelResponseDTO cadastrar(AgendaDisponivelRequestDTO dto) {
+        authorizationService.assertSelfVeterinario(dto.veterinarioId());
         var veterinario = veterinarioRepository.findById(dto.veterinarioId())
                 .orElseThrow(() -> new EntityNotFoundException("Veterinário não encontrado."));
 
@@ -38,9 +41,9 @@ public class AgendaDisponivelService {
 
     @Transactional
     public void excluir(Long id) {
-        if (!repository.existsById(id)) {
-            throw new EntityNotFoundException("Agenda não encontrada.");
-        }
+        var agenda = repository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Agenda não encontrada."));
+        authorizationService.assertSelfVeterinario(agenda.getVeterinario().getId());
         repository.deleteById(id);
     }
 }

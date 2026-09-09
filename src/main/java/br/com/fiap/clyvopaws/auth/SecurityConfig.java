@@ -52,10 +52,21 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/tutores").permitAll()
                         // Cadastro de veterinário só pode ser feito por um perfil administrativo.
                         .requestMatchers(HttpMethod.POST, "/veterinarios").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/agendamentos").hasRole("TUTOR")
-                        // Path real é GET /agendas/veterinario/{id} (AgendaDisponivelController),
-                        // não /agendamentos/veterinario (que não existe).
-                        .requestMatchers(HttpMethod.GET, "/agendas/veterinario/**").hasRole("VETERINARIO")
+                        // Quem exatamente é o "próprio dono"/"próprio veterinário" é checado
+                        // dentro dos services (AuthorizationService), não dá pra expressar
+                        // isso só com o path aqui.
+                        .requestMatchers(HttpMethod.POST, "/agendamentos").hasAnyRole("TUTOR", "ADMIN")
+                        // Horários livres de um veterinário: tanto o próprio vet quanto
+                        // qualquer tutor (pra escolher horário e agendar) podem ver —
+                        // ou seja, basta estar autenticado, não precisa de role específica.
+                        // Path real é GET /agendas/veterinario/{id} (AgendaDisponivelController).
+                        .requestMatchers(HttpMethod.GET, "/agendas/veterinario/**").authenticated()
+
+                        // Clínicas e catálogo preventivo: dado de referência, leitura livre
+                        // pra qualquer autenticado, escrita só ADMIN.
+                        .requestMatchers(HttpMethod.POST, "/clinicas", "/planos-preventivos").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/clinicas/**", "/planos-preventivos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/clinicas/**", "/planos-preventivos/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()
                 )

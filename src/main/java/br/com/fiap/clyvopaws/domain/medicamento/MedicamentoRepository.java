@@ -8,4 +8,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface MedicamentoRepository extends JpaRepository<Medicamento, Long> {
     Page<Medicamento> findByConsultaId(Long consultaId, Pageable pageable);
+    Page<Medicamento> findByConsultaVeterinarioId(Long veterinarioId, Pageable pageable);
 }

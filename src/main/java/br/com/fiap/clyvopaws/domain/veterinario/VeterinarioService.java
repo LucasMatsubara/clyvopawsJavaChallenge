@@ -1,5 +1,6 @@
 package br.com.fiap.clyvopaws.domain.veterinario;
 
+import br.com.fiap.clyvopaws.auth.AuthorizationService;
 import br.com.fiap.clyvopaws.domain.clinica.ClinicaService;
 import br.com.fiap.clyvopaws.domain.user.User;
 import jakarta.persistence.EntityNotFoundException;
@@ -17,12 +18,12 @@ public class VeterinarioService {
     private final VeterinarioRepository veterinarioRepository;
     private final ClinicaService clinicaService;
     private final PasswordEncoder passwordEncoder;
+    private final AuthorizationService authorizationService;
 
     @Transactional
     public VeterinarioResponseDTO cadastrar(VeterinarioRequestDTO dto) {
         var clinica = clinicaService.buscarPorId(dto.clinicaId());
 
-        // Cria e amarra as credenciais de segurança
         var user = new User();
         user.setUsername(dto.username());
         user.setPassword(passwordEncoder.encode(dto.password()));
@@ -54,6 +55,7 @@ public class VeterinarioService {
 
     @Transactional
     public VeterinarioResponseDTO atualizar(Long id, VeterinarioRequestDTO dto) {
+        authorizationService.assertSelfVeterinario(id);
         var vet = veterinarioRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Veterinário não encontrado."));
 
@@ -65,13 +67,13 @@ public class VeterinarioService {
         vet.setFotoUrl(dto.fotoUrl());
         vet.setCrmv(dto.crmv());
         vet.setClinica(clinica);
-        // Em um cenário real, a alteração de senha/username ocorre em um endpoint separado por segurança
 
         return new VeterinarioResponseDTO(veterinarioRepository.save(vet));
     }
 
     @Transactional
     public void excluir(Long id) {
+        authorizationService.assertSelfVeterinario(id);
         if (!veterinarioRepository.existsById(id)) {
             throw new EntityNotFoundException("Veterinário não encontrado.");
         }
