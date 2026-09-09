@@ -1,5 +1,6 @@
 package br.com.fiap.clyvopaws.domain.tutor;
 
+import br.com.fiap.clyvopaws.auth.AuthorizationService;
 import br.com.fiap.clyvopaws.domain.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ public class TutorService {
 
     private final TutorRepository tutorRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthorizationService authorizationService;
 
     @Transactional
     public TutorResponseDTO cadastrar(TutorRequestDTO request) {
@@ -55,6 +57,10 @@ public class TutorService {
 
     @Transactional(readOnly = true)
     public TutorResponseDTO buscarPorId(Long id) {
+        // Tutor só pode ver o próprio perfil; VETERINARIO e ADMIN podem ver qualquer um.
+        if (!authorizationService.hasRole("VETERINARIO")) {
+            authorizationService.assertSelfTutor(id);
+        }
         Tutor tutor = tutorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Tutor não encontrado."));
         return toResponseDTO(tutor);
@@ -62,11 +68,18 @@ public class TutorService {
 
     @Transactional(readOnly = true)
     public Page<TutorResponseDTO> listarTodos(Pageable pageable) {
+        // Listagem geral de tutores é restrita a quem atende (VETERINARIO) ou administra (ADMIN);
+        // um tutor não deve conseguir listar/navegar pelos dados de outros tutores.
+        if (!authorizationService.hasRole("VETERINARIO") && !authorizationService.isAdmin()) {
+            throw new org.springframework.security.access.AccessDeniedException(
+                    "Apenas veterinários ou administradores podem listar todos os tutores.");
+        }
         return tutorRepository.findAll(pageable).map(this::toResponseDTO);
     }
 
     @Transactional
     public TutorResponseDTO atualizar(Long id, TutorRequestDTO request) {
+        authorizationService.assertSelfTutor(id);
         Tutor tutor = tutorRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Tutor não encontrado."));
 
@@ -94,6 +107,7 @@ public class TutorService {
 
     @Transactional
     public void excluir(Long id) {
+        authorizationService.assertSelfTutor(id);
         if (!tutorRepository.existsById(id)) {
             throw new EntityNotFoundException("Tutor não encontrado.");
         }

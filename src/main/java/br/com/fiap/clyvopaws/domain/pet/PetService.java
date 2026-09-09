@@ -1,5 +1,6 @@
 package br.com.fiap.clyvopaws.domain.pet;
 
+import br.com.fiap.clyvopaws.auth.AuthorizationService;
 import br.com.fiap.clyvopaws.domain.tutor.Tutor;
 import br.com.fiap.clyvopaws.domain.tutor.TutorRepository;
 import br.com.fiap.clyvopaws.domain.tutor.TutorResumoDTO;
@@ -8,6 +9,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,9 +21,11 @@ import java.util.stream.Collectors;
 public class PetService {
     private final PetRepository petRepository;
     private final TutorRepository tutorRepository;
+    private final AuthorizationService authorizationService;
 
     @Transactional
     public PetResponseDTO cadastrar(PetRequestDTO request) {
+        authorizationService.assertSelfTutor(request.tutorId());
         Tutor tutor = tutorRepository.findById(request.tutorId()).orElseThrow(() -> new EntityNotFoundException("Tutor não encontrado."));
         Pet pet = new Pet();
         pet.setNome(request.nome());
@@ -39,22 +43,32 @@ public class PetService {
     @Transactional(readOnly = true)
     public PetResponseDTO buscarPorId(Long id) {
         Pet pet = petRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Pet não encontrado."));
+        if (!authorizationService.hasRole("VETERINARIO")) {
+            authorizationService.assertSelfTutor(pet.getTutor().getId());
+        }
         return toResponseDTO(pet);
     }
 
     @Transactional(readOnly = true)
     public List<PetResponseDTO> listarPorTutor(Long tutorId) {
+        if (!authorizationService.hasRole("VETERINARIO")) {
+            authorizationService.assertSelfTutor(tutorId);
+        }
         return petRepository.findByTutorId(tutorId).stream().map(this::toResponseDTO).collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public Page<PetResponseDTO> listarTodosPaginado(Pageable pageable) {
+        if (!authorizationService.hasRole("VETERINARIO") && !authorizationService.isAdmin()) {
+            throw new AccessDeniedException("Apenas veterinários ou administradores podem listar todos os pets.");
+        }
         return petRepository.findAll(pageable).map(this::toResponseDTO);
     }
 
     @Transactional
     public PetResponseDTO atualizar(Long id, PetRequestDTO request) {
         Pet pet = petRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Pet não encontrado."));
+        authorizationService.assertSelfTutor(pet.getTutor().getId());
         pet.setNome(request.nome());
         pet.setPeso(request.peso());
         pet.setDescricao(request.descricao());
@@ -64,7 +78,8 @@ public class PetService {
 
     @Transactional
     public void excluir(Long id) {
-        if (!petRepository.existsById(id)) throw new EntityNotFoundException("Pet não encontrado.");
+        Pet pet = petRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Pet não encontrado."));
+        authorizationService.assertSelfTutor(pet.getTutor().getId());
         petRepository.deleteById(id);
     }
 
