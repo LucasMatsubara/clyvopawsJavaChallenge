@@ -5,5 +5,5 @@ import jakarta.validation.constraints.*;
 
 public record CatalogoPreventivoRequestDTO(
         @NotNull Especie especie, @NotBlank String raca, @NotBlank String doencaPredisposta,
-        Integer idadeAlertaMeses, String dicaPrevencao, String cuidadosRecomendados
+        @PositiveOrZero Integer idadeAlertaMeses, String dicaPrevencao, String cuidadosRecomendados
 ) {}

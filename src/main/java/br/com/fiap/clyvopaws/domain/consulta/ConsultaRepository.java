@@ -10,4 +10,6 @@ public interface ConsultaRepository extends JpaRepository<Consulta, Long> {
     Page<Consulta> findByPetId(Long petId, Pageable pageable);
     Page<Consulta> findByVeterinarioId(Long veterinarioId, Pageable pageable);
     Page<Consulta> findByPetIdAndVeterinarioId(Long petId, Long veterinarioId, Pageable pageable);
+    boolean existsByVeterinarioId(Long veterinarioId);
+    boolean existsByClinicaId(Long clinicaId);
 }

@@ -2,6 +2,7 @@ package br.com.fiap.clyvopaws.domain.pet;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 
 public record PetRequestDTO(
@@ -14,6 +15,7 @@ public record PetRequestDTO(
         @NotBlank(message = "A raça é obrigatória")
         String raca,
 
+        @Positive(message = "O peso deve ser maior que zero")
         Double peso,
 
         Sexo sexo,

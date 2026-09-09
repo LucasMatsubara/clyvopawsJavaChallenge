@@ -8,4 +8,5 @@ import java.util.Optional;
 @Repository
 public interface VeterinarioRepository extends JpaRepository<Veterinario, Long> {
     Optional<Veterinario> findByUserUsername(String username);
+    boolean existsByClinicaId(Long clinicaId);
 }

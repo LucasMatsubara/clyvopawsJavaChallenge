@@ -1,5 +1,7 @@
 package br.com.fiap.clyvopaws.domain.clinica;
 
+import br.com.fiap.clyvopaws.domain.consulta.ConsultaRepository;
+import br.com.fiap.clyvopaws.domain.veterinario.VeterinarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,6 +14,8 @@ import org.springframework.transaction.annotation.Transactional;
 public class ClinicaService {
 
     private final ClinicaRepository clinicaRepository;
+    private final VeterinarioRepository veterinarioRepository;
+    private final ConsultaRepository consultaRepository;
 
     @Transactional
     public ClinicaResponseDTO cadastrar(ClinicaRequestDTO dto) {
@@ -53,6 +57,14 @@ public class ClinicaService {
     public void excluir(Long id) {
         if (!clinicaRepository.existsById(id)) {
             throw new EntityNotFoundException("Clínica não encontrada.");
+        }
+        if (veterinarioRepository.existsByClinicaId(id)) {
+            throw new IllegalArgumentException(
+                    "Não é possível excluir: esta clínica possui veterinários vinculados.");
+        }
+        if (consultaRepository.existsByClinicaId(id)) {
+            throw new IllegalArgumentException(
+                    "Não é possível excluir: esta clínica possui consultas registradas.");
         }
         clinicaRepository.deleteById(id);
     }

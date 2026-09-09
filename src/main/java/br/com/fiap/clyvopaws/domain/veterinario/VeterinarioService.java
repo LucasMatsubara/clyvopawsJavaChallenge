@@ -2,6 +2,7 @@ package br.com.fiap.clyvopaws.domain.veterinario;
 
 import br.com.fiap.clyvopaws.auth.AuthorizationService;
 import br.com.fiap.clyvopaws.domain.clinica.ClinicaService;
+import br.com.fiap.clyvopaws.domain.consulta.ConsultaRepository;
 import br.com.fiap.clyvopaws.domain.user.User;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,7 @@ public class VeterinarioService {
     private final ClinicaService clinicaService;
     private final PasswordEncoder passwordEncoder;
     private final AuthorizationService authorizationService;
+    private final ConsultaRepository consultaRepository;
 
     @Transactional
     public VeterinarioResponseDTO cadastrar(VeterinarioRequestDTO dto) {
@@ -76,6 +78,10 @@ public class VeterinarioService {
         authorizationService.assertSelfVeterinario(id);
         if (!veterinarioRepository.existsById(id)) {
             throw new EntityNotFoundException("Veterinário não encontrado.");
+        }
+        if (consultaRepository.existsByVeterinarioId(id)) {
+            throw new IllegalArgumentException(
+                    "Não é possível excluir: este veterinário possui consultas registradas.");
         }
         veterinarioRepository.deleteById(id);
     }
