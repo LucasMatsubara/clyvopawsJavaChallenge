@@ -178,25 +178,25 @@ VALUES (TIMESTAMP '2026-06-02 09:30:00', 'Revisão Pipoca', 'Geral', (SELECT id 
 
 -- 10. tb_medicamento (10 registros)
 INSERT INTO tb_medicamento (nome, dosagem, frequencia, data_inicio, duracao_dias, status, consulta_id)
-VALUES ('Vitamina A', '1 comp', '1x ao dia', DATE '2026-06-01', 30, 'ATIVO', (SELECT id FROM tb_consulta WHERE diagnostico = 'Saudável' AND ROWNUM = 1));
+VALUES ('Vitamina A', '1 comp', '1x ao dia', DATE '2026-06-01', 30, 'EM_DIA', (SELECT id FROM tb_consulta WHERE diagnostico = 'Saudável' AND ROWNUM = 1));
 INSERT INTO tb_medicamento (nome, dosagem, frequencia, data_inicio, duracao_dias, status, consulta_id)
-VALUES ('Pomada X', 'Local', '2x ao dia', DATE '2026-06-01', 7, 'ATIVO', (SELECT id FROM tb_consulta WHERE diagnostico = 'Alergia' AND ROWNUM = 1));
+VALUES ('Pomada X', 'Local', '2x ao dia', DATE '2026-06-01', 7, 'EM_DIA', (SELECT id FROM tb_consulta WHERE diagnostico = 'Alergia' AND ROWNUM = 1));
 INSERT INTO tb_medicamento (nome, dosagem, frequencia, data_inicio, duracao_dias, status, consulta_id)
-VALUES ('Antibiótico', '5ml', '12/12h', DATE '2026-06-01', 10, 'ATIVO', (SELECT id FROM tb_consulta WHERE diagnostico = 'Virose' AND ROWNUM = 1));
+VALUES ('Antibiótico', '5ml', '12/12h', DATE '2026-06-01', 10, 'EM_DIA', (SELECT id FROM tb_consulta WHERE diagnostico = 'Virose' AND ROWNUM = 1));
 INSERT INTO tb_medicamento (nome, dosagem, frequencia, data_inicio, duracao_dias, status, consulta_id)
-VALUES ('Anti-inflamatório', '1 comp', '24/24h', DATE '2026-06-01', 5, 'ATIVO', (SELECT id FROM tb_consulta WHERE diagnostico = 'Artrose' AND ROWNUM = 1));
+VALUES ('Anti-inflamatório', '1 comp', '24/24h', DATE '2026-06-01', 5, 'EM_DIA', (SELECT id FROM tb_consulta WHERE diagnostico = 'Artrose' AND ROWNUM = 1));
 INSERT INTO tb_medicamento (nome, dosagem, frequencia, data_inicio, duracao_dias, status, consulta_id)
-VALUES ('Protetor', '1 comp', '1x ao dia', DATE '2026-06-01', 14, 'ATIVO', (SELECT id FROM tb_consulta WHERE diagnostico = 'Gastrite' AND ROWNUM = 1));
+VALUES ('Protetor', '1 comp', '1x ao dia', DATE '2026-06-01', 14, 'EM_DIA', (SELECT id FROM tb_consulta WHERE diagnostico = 'Gastrite' AND ROWNUM = 1));
 INSERT INTO tb_medicamento (nome, dosagem, frequencia, data_inicio, duracao_dias, status, consulta_id)
-VALUES ('Vitamina C', '1 comp', '1x ao dia', DATE '2026-06-01', 30, 'ATIVO', (SELECT id FROM tb_consulta WHERE diagnostico = 'Ok' AND ROWNUM = 1));
+VALUES ('Vitamina C', '1 comp', '1x ao dia', DATE '2026-06-01', 30, 'EM_DIA', (SELECT id FROM tb_consulta WHERE diagnostico = 'Ok' AND ROWNUM = 1));
 INSERT INTO tb_medicamento (nome, dosagem, frequencia, data_inicio, duracao_dias, status, consulta_id)
-VALUES ('Colírio', '2 gotas', '8/8h', DATE '2026-06-01', 5, 'ATIVO', (SELECT id FROM tb_consulta WHERE diagnostico = 'Conjuntivite' AND ROWNUM = 1));
+VALUES ('Colírio', '2 gotas', '8/8h', DATE '2026-06-01', 5, 'EM_DIA', (SELECT id FROM tb_consulta WHERE diagnostico = 'Conjuntivite' AND ROWNUM = 1));
 INSERT INTO tb_medicamento (nome, dosagem, frequencia, data_inicio, duracao_dias, status, consulta_id)
 VALUES ('Vermífugo', '1 comp', 'Única', DATE '2026-06-01', 1, 'CONCLUIDO', (SELECT id FROM tb_consulta WHERE diagnostico = 'Verme' AND ROWNUM = 1));
 INSERT INTO tb_medicamento (nome, dosagem, frequencia, data_inicio, duracao_dias, status, consulta_id)
-VALUES ('Xarope', '3ml', '8/8h', DATE '2026-06-02', 7, 'ATIVO', (SELECT id FROM tb_consulta WHERE diagnostico = 'Gripe' AND ROWNUM = 1));
+VALUES ('Xarope', '3ml', '8/8h', DATE '2026-06-02', 7, 'EM_DIA', (SELECT id FROM tb_consulta WHERE diagnostico = 'Gripe' AND ROWNUM = 1));
 INSERT INTO tb_medicamento (nome, dosagem, frequencia, data_inicio, duracao_dias, status, consulta_id)
-VALUES ('Suplemento', '1 comp', '1x ao dia', DATE '2026-06-02', 60, 'ATIVO', (SELECT id FROM tb_consulta WHERE diagnostico = 'Saudável' AND ROWNUM = 1));
+VALUES ('Suplemento', '1 comp', '1x ao dia', DATE '2026-06-02', 60, 'EM_DIA', (SELECT id FROM tb_consulta WHERE diagnostico = 'Saudável' AND ROWNUM = 1));
 
 -- 11. tb_historico_dose (10 registros)
 INSERT INTO tb_historico_dose (data_hora_toma, medicamento_id)
