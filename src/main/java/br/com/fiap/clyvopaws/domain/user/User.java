@@ -24,7 +24,7 @@ public class User {
     @Size(min = 6)
     private String password;
 
-    @Pattern(regexp = "USER|ADMIN")
+    @Pattern(regexp = "TUTOR|VETERINARIO|ADMIN")
     private String role;
 
 }

@@ -1,14 +1,14 @@
 -- 1. tb_user (10 registros)
-INSERT INTO tb_user (username, password, role) VALUES ('vet1@clyvopaws.com', '$2a$10$XURPShQNCsLjp1ESc2laoObo9QZDhxz73hJPaEv7/cBha4pk0AgP.', 'VETERINARIO');
-INSERT INTO tb_user (username, password, role) VALUES ('vet2@clyvopaws.com', '$2a$10$X...dummyhash', 'VETERINARIO');
-INSERT INTO tb_user (username, password, role) VALUES ('vet3@clyvopaws.com', '$2a$10$X...dummyhash', 'VETERINARIO');
-INSERT INTO tb_user (username, password, role) VALUES ('vet4@clyvopaws.com', '$2a$10$X...dummyhash', 'VETERINARIO');
-INSERT INTO tb_user (username, password, role) VALUES ('vet5@clyvopaws.com', '$2a$10$X...dummyhash', 'VETERINARIO');
-INSERT INTO tb_user (username, password, role) VALUES ('tutor1@email.com', '$2a$10$X...dummyhash', 'TUTOR');
-INSERT INTO tb_user (username, password, role) VALUES ('tutor2@email.com', '$2a$10$X...dummyhash', 'TUTOR');
-INSERT INTO tb_user (username, password, role) VALUES ('tutor3@email.com', '$2a$10$X...dummyhash', 'TUTOR');
-INSERT INTO tb_user (username, password, role) VALUES ('tutor4@email.com', '$2a$10$X...dummyhash', 'TUTOR');
-INSERT INTO tb_user (username, password, role) VALUES ('tutor5@email.com', '$2a$10$X...dummyhash', 'TUTOR');
+INSERT INTO tb_user (username, password, role) VALUES ('vet1@clyvopaws.com', '$2a$10$z2ZH77jEKSUNB.wIqUWIlOOvQ6g8e655QuPx4KyN7Cw1KcK55MN86', 'VETERINARIO');
+INSERT INTO tb_user (username, password, role) VALUES ('vet2@clyvopaws.com', '$2a$10$z2ZH77jEKSUNB.wIqUWIlOOvQ6g8e655QuPx4KyN7Cw1KcK55MN86', 'VETERINARIO');
+INSERT INTO tb_user (username, password, role) VALUES ('vet3@clyvopaws.com', '$2a$10$z2ZH77jEKSUNB.wIqUWIlOOvQ6g8e655QuPx4KyN7Cw1KcK55MN86', 'VETERINARIO');
+INSERT INTO tb_user (username, password, role) VALUES ('vet4@clyvopaws.com', '$2a$10$z2ZH77jEKSUNB.wIqUWIlOOvQ6g8e655QuPx4KyN7Cw1KcK55MN86', 'VETERINARIO');
+INSERT INTO tb_user (username, password, role) VALUES ('vet5@clyvopaws.com', '$2a$10$z2ZH77jEKSUNB.wIqUWIlOOvQ6g8e655QuPx4KyN7Cw1KcK55MN86', 'VETERINARIO');
+INSERT INTO tb_user (username, password, role) VALUES ('tutor1@email.com', '$2a$10$z2ZH77jEKSUNB.wIqUWIlOOvQ6g8e655QuPx4KyN7Cw1KcK55MN86', 'TUTOR');
+INSERT INTO tb_user (username, password, role) VALUES ('tutor2@email.com', '$2a$10$z2ZH77jEKSUNB.wIqUWIlOOvQ6g8e655QuPx4KyN7Cw1KcK55MN86', 'TUTOR');
+INSERT INTO tb_user (username, password, role) VALUES ('tutor3@email.com', '$2a$10$z2ZH77jEKSUNB.wIqUWIlOOvQ6g8e655QuPx4KyN7Cw1KcK55MN86', 'TUTOR');
+INSERT INTO tb_user (username, password, role) VALUES ('tutor4@email.com', '$2a$10$z2ZH77jEKSUNB.wIqUWIlOOvQ6g8e655QuPx4KyN7Cw1KcK55MN86', 'TUTOR');
+INSERT INTO tb_user (username, password, role) VALUES ('tutor5@email.com', '$2a$10$z2ZH77jEKSUNB.wIqUWIlOOvQ6g8e655QuPx4KyN7Cw1KcK55MN86', 'TUTOR');
 
 -- 2. tb_clinica (10 registros)
 INSERT INTO tb_clinica (nome, cnpj, telefone, email) VALUES ('Clínica Paws Care Matriz', '11.111.111/0001-11', '11911111111', 'matriz@pawscare.com');

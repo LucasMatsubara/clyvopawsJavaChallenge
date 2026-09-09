@@ -43,6 +43,7 @@ public class TutorService {
             endereco.setRua(request.endereco().rua());
             endereco.setNumero(request.endereco().numero());
             endereco.setComplemento(request.endereco().complemento());
+            endereco.setBairro(request.endereco().bairro());
             endereco.setCep(request.endereco().cep());
             endereco.setCidade(request.endereco().cidade());
             endereco.setEstado(request.endereco().estado());
@@ -82,6 +83,7 @@ public class TutorService {
             tutor.getEndereco().setRua(request.endereco().rua());
             tutor.getEndereco().setNumero(request.endereco().numero());
             tutor.getEndereco().setComplemento(request.endereco().complemento());
+            tutor.getEndereco().setBairro(request.endereco().bairro());
             tutor.getEndereco().setCep(request.endereco().cep());
             tutor.getEndereco().setCidade(request.endereco().cidade());
             tutor.getEndereco().setEstado(request.endereco().estado());

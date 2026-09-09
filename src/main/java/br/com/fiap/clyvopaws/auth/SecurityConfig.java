@@ -44,9 +44,18 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**"
                         ).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
+                        // Login: o AuthController está mapeado em "/login" (sem prefixo "/auth").
+                        // Precisa ser público, senão ninguém consegue gerar token.
+                        .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        // Autocadastro de tutor: precisa ser público, pois é o próprio tutor
+                        // criando sua conta (cria o User em cascata dentro de TutorService).
+                        .requestMatchers(HttpMethod.POST, "/tutores").permitAll()
+                        // Cadastro de veterinário só pode ser feito por um perfil administrativo.
+                        .requestMatchers(HttpMethod.POST, "/veterinarios").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/agendamentos").hasRole("TUTOR")
-                        .requestMatchers(HttpMethod.GET, "/agendamentos/veterinario").hasRole("VETERINARIO")
+                        // Path real é GET /agendas/veterinario/{id} (AgendaDisponivelController),
+                        // não /agendamentos/veterinario (que não existe).
+                        .requestMatchers(HttpMethod.GET, "/agendas/veterinario/**").hasRole("VETERINARIO")
 
                         .anyRequest().authenticated()
                 )
