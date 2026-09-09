@@ -1,5 +1,6 @@
 package br.com.fiap.clyvopaws.domain.veterinario;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping("/veterinarios")
 @RequiredArgsConstructor
+@Tag(name = "Veterinários", description = "Endpoints para gerenciamento dos veterinários e seus dados")
 public class VeterinarioController {
 
     private final VeterinarioService service;

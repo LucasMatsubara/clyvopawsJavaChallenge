@@ -2,6 +2,7 @@ package br.com.fiap.clyvopaws.exception;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -14,6 +15,18 @@ import java.util.List;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler(PropertyReferenceException.class)
+    public ResponseEntity<ErroPadrao> tratarErroDeOrdenacao(PropertyReferenceException e, HttpServletRequest request) {
+        ErroPadrao erro = new ErroPadrao(
+                LocalDateTime.now(),
+                HttpStatus.BAD_REQUEST.value(),
+                "Parâmetro de Ordenação Inválido",
+                "O campo '" + e.getPropertyName() + "' informado em 'sort' não existe neste recurso.",
+                request.getRequestURI()
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(erro);
+    }
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ErroPadrao> tratarErro403(AccessDeniedException e, HttpServletRequest request) {

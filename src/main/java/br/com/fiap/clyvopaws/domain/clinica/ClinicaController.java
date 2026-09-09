@@ -1,5 +1,6 @@
 package br.com.fiap.clyvopaws.domain.clinica;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -12,6 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 @RestController
 @RequestMapping("/clinicas")
 @RequiredArgsConstructor
+@Tag(name = "Pets", description = "Endpoints para gerenciamento dos pets")
 public class ClinicaController {
 
     private final ClinicaService service;

@@ -1,5 +1,6 @@
 package br.com.fiap.clyvopaws.domain.agendamento;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/agendas")
 @RequiredArgsConstructor
+@Tag(name = "Agenda Disponível", description = "Endpoints para consulta de disponibilidade de agenda")
 public class AgendaDisponivelController {
 
     private final AgendaDisponivelService service;

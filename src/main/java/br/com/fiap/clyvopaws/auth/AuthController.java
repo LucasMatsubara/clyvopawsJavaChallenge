@@ -1,5 +1,6 @@
 package br.com.fiap.clyvopaws.auth;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
+@Tag(name = "Login", description = "Endpoints para login de usuários")
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
