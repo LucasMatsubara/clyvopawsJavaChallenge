@@ -19,6 +19,10 @@ public class AgendaDisponivelService {
     @Transactional
     public AgendaDisponivelResponseDTO cadastrar(AgendaDisponivelRequestDTO dto) {
         authorizationService.assertSelfVeterinario(dto.veterinarioId());
+
+        if (!dto.dataHoraFim().isAfter(dto.dataHoraInicio())) {
+            throw new IllegalArgumentException("O horário de término deve ser depois do horário de início.");
+        }
         var veterinario = veterinarioRepository.findById(dto.veterinarioId())
                 .orElseThrow(() -> new EntityNotFoundException("Veterinário não encontrado."));
 
