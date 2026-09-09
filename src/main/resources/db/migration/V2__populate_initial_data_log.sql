@@ -1,5 +1,5 @@
 -- 1. tb_user (10 registros)
-INSERT INTO tb_user (username, password, role) VALUES ('vet1@clyvopaws.com', '$2a$10$X...dummyhash', 'VETERINARIO');
+INSERT INTO tb_user (username, password, role) VALUES ('vet1@clyvopaws.com', '$2a$10$XURPShQNCsLjp1ESc2laoObo9QZDhxz73hJPaEv7/cBha4pk0AgP.', 'VETERINARIO');
 INSERT INTO tb_user (username, password, role) VALUES ('vet2@clyvopaws.com', '$2a$10$X...dummyhash', 'VETERINARIO');
 INSERT INTO tb_user (username, password, role) VALUES ('vet3@clyvopaws.com', '$2a$10$X...dummyhash', 'VETERINARIO');
 INSERT INTO tb_user (username, password, role) VALUES ('vet4@clyvopaws.com', '$2a$10$X...dummyhash', 'VETERINARIO');
