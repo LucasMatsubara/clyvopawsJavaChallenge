@@ -1,5 +1,6 @@
 package br.com.fiap.clyvopaws.auth;
 
+import br.com.fiap.clyvopaws.domain.tutor.TutorRepository;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,9 +17,10 @@ public class AuthController {
 
     private final AuthenticationManager authenticationManager;
     private final TokenService tokenService;
+    private final TutorRepository tutorRepository;
 
     public record LoginRequest(String username, String password) {}
-    public record LoginResponse(String token) {}
+    public record LoginResponse(String token, String nomeCompleto, String fotoUrl, Long id) {}
 
     @PostMapping("/login")
     public LoginResponse login(@RequestBody LoginRequest request){
@@ -29,7 +31,14 @@ public class AuthController {
                 )
         );
 
-        return new LoginResponse(tokenService.generateToken(auth.getName()));
+        String token = tokenService.generateToken(auth.getName());
+
+        var tutor = tutorRepository.findByUserUsername(auth.getName()).orElse(null);
+        String nome = (tutor != null) ? tutor.getNomeCompleto() : auth.getName();
+        String foto = (tutor != null) ? tutor.getFotoUrl() : null;
+        Long tutorId = (tutor != null) ? tutor.getId() : null;
+
+        return new LoginResponse(token, nome, foto, tutorId);
     }
 
 }

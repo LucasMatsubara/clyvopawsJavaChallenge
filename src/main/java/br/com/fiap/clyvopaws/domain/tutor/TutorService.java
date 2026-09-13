@@ -10,6 +10,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import br.com.fiap.clyvopaws.domain.user.UserRepository;
+
 @Service
 @RequiredArgsConstructor
 public class TutorService {
@@ -17,6 +19,7 @@ public class TutorService {
     private final TutorRepository tutorRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthorizationService authorizationService;
+    private final UserRepository userRepository;
 
     @Transactional
     public TutorResponseDTO cadastrar(TutorRequestDTO request) {
@@ -57,7 +60,6 @@ public class TutorService {
 
     @Transactional(readOnly = true)
     public TutorResponseDTO buscarPorId(Long id) {
-        // Tutor só pode ver o próprio perfil; VETERINARIO e ADMIN podem ver qualquer um.
         if (!authorizationService.hasRole("VETERINARIO")) {
             authorizationService.assertSelfTutor(id);
         }
@@ -68,8 +70,6 @@ public class TutorService {
 
     @Transactional(readOnly = true)
     public Page<TutorResponseDTO> listarTodos(Pageable pageable) {
-        // Listagem geral de tutores é restrita a quem atende (VETERINARIO) ou administra (ADMIN);
-        // um tutor não deve conseguir listar/navegar pelos dados de outros tutores.
         if (!authorizationService.hasRole("VETERINARIO") && !authorizationService.isAdmin()) {
             throw new org.springframework.security.access.AccessDeniedException(
                     "Apenas veterinários ou administradores podem listar todos os tutores.");
@@ -78,28 +78,24 @@ public class TutorService {
     }
 
     @Transactional
-    public TutorResponseDTO atualizar(Long id, TutorRequestDTO request) {
+    public TutorResponseDTO atualizar(Long id, TutorUpdateDTO dto) {
         authorizationService.assertSelfTutor(id);
+
         Tutor tutor = tutorRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Tutor não encontrado."));
+                .orElseThrow(() -> new EntityNotFoundException("Tutor não encontrado com o id: " + id));
 
-        tutor.setNomeCompleto(request.nomeCompleto());
-        tutor.setCpf(request.cpf());
-        tutor.setTelefone(request.telefone());
-        tutor.setEmail(request.email());
-        tutor.setFotoUrl(request.fotoUrl());
+        tutor.setNomeCompleto(dto.nomeCompleto());
+        tutor.setEmail(dto.email());
+        tutor.setCpf(dto.cpf());
+        tutor.setTelefone(dto.telefone());
 
-        if (request.endereco() != null) {
-            if (tutor.getEndereco() == null) {
-                tutor.setEndereco(new Endereco());
-            }
-            tutor.getEndereco().setRua(request.endereco().rua());
-            tutor.getEndereco().setNumero(request.endereco().numero());
-            tutor.getEndereco().setComplemento(request.endereco().complemento());
-            tutor.getEndereco().setBairro(request.endereco().bairro());
-            tutor.getEndereco().setCep(request.endereco().cep());
-            tutor.getEndereco().setCidade(request.endereco().cidade());
-            tutor.getEndereco().setEstado(request.endereco().estado());
+        if (dto.foto() != null) {
+            tutor.setFotoUrl(dto.foto());
+        }
+
+        if (tutor.getUser() != null) {
+            tutor.getUser().setUsername(dto.email());
+            userRepository.save(tutor.getUser());
         }
 
         return toResponseDTO(tutorRepository.save(tutor));
@@ -108,10 +104,17 @@ public class TutorService {
     @Transactional
     public void excluir(Long id) {
         authorizationService.assertSelfTutor(id);
-        if (!tutorRepository.existsById(id)) {
-            throw new EntityNotFoundException("Tutor não encontrado.");
+
+        Tutor tutor = tutorRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Tutor não encontrado."));
+
+        User user = tutor.getUser();
+
+        tutorRepository.delete(tutor);
+
+        if (user != null) {
+            userRepository.delete(user);
         }
-        tutorRepository.deleteById(id);
     }
 
     private TutorResponseDTO toResponseDTO(Tutor tutor) {
@@ -124,4 +127,6 @@ public class TutorService {
                 tutor.getFotoUrl()
         );
     }
+
+
 }
