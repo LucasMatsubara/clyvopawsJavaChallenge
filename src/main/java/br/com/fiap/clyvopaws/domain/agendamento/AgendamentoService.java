@@ -1,10 +1,16 @@
 package br.com.fiap.clyvopaws.domain.agendamento;
 
 import br.com.fiap.clyvopaws.auth.AuthorizationService;
+import br.com.fiap.clyvopaws.domain.clinica.Clinica;
+import br.com.fiap.clyvopaws.domain.clinica.ClinicaRepository;
 import br.com.fiap.clyvopaws.domain.consulta.Consulta;
 import br.com.fiap.clyvopaws.domain.consulta.ConsultaRepository;
 import br.com.fiap.clyvopaws.domain.consulta.ConsultaResponseDTO;
 import br.com.fiap.clyvopaws.domain.consulta.ConsultaService;
+import br.com.fiap.clyvopaws.domain.pet.Pet;
+import br.com.fiap.clyvopaws.domain.pet.PetRepository;
+import br.com.fiap.clyvopaws.domain.veterinario.Veterinario;
+import br.com.fiap.clyvopaws.domain.veterinario.VeterinarioRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +29,9 @@ public class AgendamentoService {
     private final ConsultaService consultaService;
     private final AgendaDisponivelRepository agendaDisponivelRepository;
     private final AuthorizationService authorizationService;
+    private final ClinicaRepository clinicaRepository;
+    private final VeterinarioRepository veterinarioRepository;
+    private final PetRepository petRepository;
 
     private void assertPodeVer(Agendamento agendamento) {
         Consulta consulta = agendamento.getConsulta();
@@ -36,9 +45,34 @@ public class AgendamentoService {
 
     @Transactional
     public AgendamentoResponseDTO cadastrar(AgendamentoRequestDTO request) {
-        Consulta consulta = consultaRepository.findById(request.consultaId())
-                .orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
-        authorizationService.assertSelfTutor(consulta.getPet().getTutor().getId());
+        Consulta consulta;
+
+        if (request.consultaId() != null) {
+            consulta = consultaRepository.findById(request.consultaId())
+                    .orElseThrow(() -> new EntityNotFoundException("Consulta não encontrada."));
+            authorizationService.assertSelfTutor(consulta.getPet().getTutor().getId());
+        } else {
+            if (request.petId() == null) {
+                throw new IllegalArgumentException("O ID do Pet é obrigatório para novos agendamentos.");
+            }
+
+            Pet pet = petRepository.findById(request.petId())
+                    .orElseThrow(() -> new EntityNotFoundException("Pet não encontrado."));
+            authorizationService.assertSelfTutor(pet.getTutor().getId());
+
+            Clinica clinica = clinicaRepository.findById(request.clinicaId())
+                    .orElseThrow(() -> new EntityNotFoundException("Clínica não encontrada."));
+            Veterinario veterinario = veterinarioRepository.findById(request.veterinarioId())
+                    .orElseThrow(() -> new EntityNotFoundException("Veterinário não encontrado."));
+
+            consulta = new Consulta();
+            consulta.setPet(pet);
+            consulta.setDataHora(request.dataHora());
+            consulta.setClinica(clinica);
+            consulta.setVeterinario(veterinario);
+
+            consulta = consultaRepository.save(consulta);
+        }
 
         var veterinario = consulta.getVeterinario();
         if (veterinario != null) {
@@ -53,11 +87,13 @@ public class AgendamentoService {
             agendaDisponivelRepository.save(agendaDisponivel);
         }
 
+        // Finalmente, cria o Agendamento e vincula à Consulta
         Agendamento agendamento = new Agendamento();
         agendamento.setDataHora(request.dataHora());
         agendamento.setTitulo(request.titulo());
         agendamento.setDescricao(request.descricao());
         agendamento.setConsulta(consulta);
+
         return toResponseDTO(agendamentoRepository.save(agendamento));
     }
 
@@ -113,12 +149,33 @@ public class AgendamentoService {
                 ? new ConsultaResponseDTO(agendamento.getConsulta())
                 : null;
 
+        Long petId = (agendamento.getConsulta() != null && agendamento.getConsulta().getPet() != null)
+                ? agendamento.getConsulta().getPet().getId()
+                : null;
+
         return new AgendamentoResponseDTO(
                 agendamento.getId(),
                 agendamento.getDataHora(),
                 agendamento.getTitulo(),
                 agendamento.getDescricao(),
+                petId,
                 consultaDTO
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<AgendamentoResponseDTO> listarPorPet(Long petId) {
+        return agendamentoRepository.findByConsultaPetId(petId)
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<AgendamentoResponseDTO> listarPorTutor(Long tutorId) {
+        return agendamentoRepository.findByTutorId(tutorId)
+                .stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
     }
 }

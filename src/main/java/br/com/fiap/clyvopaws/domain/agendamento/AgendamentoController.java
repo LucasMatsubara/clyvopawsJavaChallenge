@@ -54,4 +54,14 @@ public class AgendamentoController {
         agendamentoService.excluir(id);
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/pet/{petId}")
+    public ResponseEntity<List<AgendamentoResponseDTO>> listarPorPet(@PathVariable Long petId) {
+        return ResponseEntity.ok(agendamentoService.listarPorPet(petId));
+    }
+
+    @GetMapping("/tutor/{tutorId}")
+    public ResponseEntity<List<AgendamentoResponseDTO>> listarPorTutor(@PathVariable Long tutorId) {
+        return ResponseEntity.ok(agendamentoService.listarPorTutor(tutorId));
+    }
 }

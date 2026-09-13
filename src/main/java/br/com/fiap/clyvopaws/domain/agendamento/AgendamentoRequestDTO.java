@@ -19,6 +19,14 @@ public record AgendamentoRequestDTO(
         @Size(max = 255, message = "A descrição deve ter no máximo 255 caracteres")
         String descricao,
 
-        @NotNull(message = "O ID da consulta de origem é obrigatório")
-        Long consultaId
+        Long consultaId,
+        String status,
+        Long petId,
+
+        @NotNull(message = "O ID da clínica é obrigatório")
+        Long clinicaId,
+
+        @NotNull(message = "O ID do veterinário é obrigatório")
+        Long veterinarioId
+
 ) {}
