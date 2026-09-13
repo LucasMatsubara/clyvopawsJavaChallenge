@@ -60,11 +60,18 @@ public class MedicamentoService {
         if (authorizationService.isAdmin()) {
             return medicamentoRepository.findAll(pageable).map(this::toResponseDTO);
         }
+
         var vet = authorizationService.currentVeterinarioOrNull();
-        if (vet == null) {
-            throw new AccessDeniedException("Apenas veterinários (dos próprios pacientes) ou administradores podem listar todos os medicamentos.");
+        if (vet != null) {
+            return medicamentoRepository.findByConsultaVeterinarioId(vet.getId(), pageable).map(this::toResponseDTO);
         }
-        return medicamentoRepository.findByConsultaVeterinarioId(vet.getId(), pageable).map(this::toResponseDTO);
+
+        var tutor = authorizationService.currentTutorOrNull();
+        if (tutor != null) {
+            return medicamentoRepository.findByConsultaPetTutorId(tutor.getId(), pageable).map(this::toResponseDTO);
+        }
+
+        throw new AccessDeniedException("Acesso negado. Você precisa ser um Veterinário, Tutor ou Administrador.");
     }
 
     @Transactional(readOnly = true)

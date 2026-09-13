@@ -70,9 +70,14 @@ public class PetService {
         Pet pet = petRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Pet não encontrado."));
         authorizationService.assertSelfTutor(pet.getTutor().getId());
         pet.setNome(request.nome());
+        pet.setEspecie(request.especie());
+        pet.setRaca(request.raca());
         pet.setPeso(request.peso());
+        pet.setSexo(request.sexo());
+        pet.setDataNascimento(request.dataNascimento());
         pet.setDescricao(request.descricao());
         pet.setFotoUrl(request.fotoUrl());
+
         return toResponseDTO(petRepository.save(pet));
     }
 
